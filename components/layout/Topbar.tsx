@@ -1,8 +1,21 @@
 'use client';
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  SidebarTrigger
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from '@/store/authStore';
-import { useThemeStore } from '@/store/themeStore';
+import { Bell, LogOut, Moon, Sun } from 'lucide-react';
+import { useTheme } from "next-themes";
 import { usePathname } from 'next/navigation';
-import { Bell, Sun, Moon, LogOut } from 'lucide-react';
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -16,94 +29,84 @@ export default function Topbar() {
   const pathname = usePathname();
   const currentUser = useAuthStore((s) => s.currentUser);
   const logout = useAuthStore((s) => s.logout);
-  const { theme, toggle } = useThemeStore();
+  const { setTheme } = useTheme()
 
   const title = Object.entries(PAGE_TITLES).find(([k]) => pathname.startsWith(k))?.[1] ?? 'Dashboard';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-  const iconBtnStyle: React.CSSProperties = {
-    width: 32, height: 32, borderRadius: 4,
-    background: 'var(--surface-2)',
-    border: '1px solid var(--border)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer', color: 'var(--text-muted)',
-    transition: 'background 0.15s, color 0.15s',
-  };
-
   return (
-    <header
-      style={{
-        height: 52,
-        background: 'var(--surface)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 24px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        transition: 'background 0.2s',
-      }}
-    >
-      <div>
-        <h1 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{title}</h1>
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{today}</p>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-2">
+      <div className="flex items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-vertical:h-4 data-vertical:self-auto bg-muted text-pri"
+        />
+        <div>
+          <h1 className="m-0 text-lg font-bold text-foreground">{title}</h1>
+          <p className="m-0 text-xs text-muted-foreground">{today}</p>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
+      <div className="flex items-center gap-2 mr-4">
         {/* Role badge */}
-        <span style={{
-          padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
-          background: currentUser?.role === 'admin' ? 'rgba(0, 120, 212, 0.15)' : 'rgba(15, 108, 189, 0.15)',
-          color: currentUser?.role === 'admin' ? 'var(--accent)' : 'var(--primary)',
-          border: `1px solid ${currentUser?.role === 'admin' ? 'rgba(0, 120, 212, 0.3)' : 'rgba(15, 108, 189, 0.3)'}`,
-          textTransform: 'uppercase', letterSpacing: '0.05em',
-        }}>
+        <Badge className="rounded-none p-2" variant='secondary'>
           {currentUser?.role ?? 'Guest'}
-        </span>
+        </Badge>
 
         {/* Theme toggle */}
-        <button
-          onClick={toggle}
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          style={iconBtnStyle}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--primary)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+              Light
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+              Dark
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+              System
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Notification bell */}
-        <button style={iconBtnStyle}><Bell size={16} /></button>
+        <Button
+          variant='outline'
+          size='icon'
+        ><Bell size={16} /></Button>
 
         {/* User avatar */}
-        <div style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: currentUser?.role === 'admin' ? 'var(--accent)' : 'var(--primary)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, fontWeight: 700, color: '#fff',
-        }}>
+        <div
+          className={
+            cn(currentUser?.role === 'admin' ? 'bg-primary' : 'bg-accent', 'w-8 h-8 flex items-center justify-center text-xs font-bold text-white rounded-full')
+          }
+        >
           {currentUser?.avatarInitials}
         </div>
 
         {/* Logout Button */}
-        <button
+        <Button
+          variant='outline'
+          size='icon'
           onClick={() => { logout(); }}
           title="Log out"
-          style={{
-            width: 32, height: 32, borderRadius: 4,
-            background: 'var(--surface-2)', border: '1px solid rgba(239,68,68,0.2)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#ef4444',
-            transition: 'all 0.15s',
-            marginLeft: 4
-          }}
+          className="
+          w-8 border border-destructive ml-1 transition-all cursor-pointer 
+          text-destructive
+          "
           onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-2)'; }}
         >
           <LogOut size={16} />
-        </button>
+        </Button>
       </div>
     </header>
   );

@@ -8,6 +8,7 @@ import {
 } from '@/lib/kpiEngine';
 import { formatPercent, formatCurrency } from '@/lib/utils';
 import SectionHeader from '@/components/ui/SectionHeader';
+import { Card } from '@/components/ui/card';
 import {
   BarChart, Bar, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
@@ -42,15 +43,13 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
 
   const memberNames = members.filter(m => m.status === 'active').map(m => m.name.split(' ')[0]);
 
-  const cardStyle: React.CSSProperties = {
-    background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '20px',
-  };
+  const cardStyle = "p-5 bg-card text-card-foreground border rounded-lg shadow-sm";
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
       {/* ── 1. Average Bids Per Day ──────────────────────────── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader
           title="Average Bids Per Day — by BD Member"
           subtitle="Measures daily bidding pace across the team"
@@ -110,10 +109,10 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
 
       {/* ── 2. Weekly BD Comparison ──────────────────────────── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader
           title="Weekly BD Comparison — Lead Volume & Momentum"
           subtitle="Bids submitted per BD member per week (last 6 weeks)"
@@ -168,10 +167,10 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
             });
           })()}
         </div>
-      </div>
+      </Card>
 
       {/* ── 3. Profile Performance Deep Dive ─────────────────── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader
           title="Profile Performance Deep Dive"
           subtitle="Overall vs recent (last 4 weeks) win rate — momentum shown"
@@ -231,7 +230,7 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
     </div>
   );

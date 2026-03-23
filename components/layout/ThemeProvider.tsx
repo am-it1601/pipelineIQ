@@ -1,14 +1,11 @@
-'use client';
-import { useEffect } from 'react';
-import { useThemeStore } from '@/store/themeStore';
+"use client"
 
-/** Applies data-theme="dark"|"light" to <html> based on Zustand store */
-export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useThemeStore((s) => s.theme);
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+import * as React from "react"
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  return <>{children}</>;
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
 }

@@ -6,6 +6,11 @@ import { formatDate, formatCurrency, generateId } from '@/lib/utils';
 import StatusBadge from '@/components/ui/StatusBadge';
 import QuickAddForm from './QuickAddForm';
 import { Plus, Search, Pencil, Trash2, Check, X, ExternalLink, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Star } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 
 const LEAD_SOURCES: LeadSource[]   = ['Upwork', 'Referral', 'LinkedIn', 'Direct'];
 const BID_TYPES: BidType[]         = ['Normal', 'Boosted'];
@@ -46,12 +51,11 @@ function EditableCell({ value, type = 'text', options, onChange }: {
   return <input type={type === 'url' ? 'text' : type} value={value} onChange={(e) => onChange(e.target.value)} style={style} autoFocus />;
 }
 
-/** Sort icon with three states: neutral, asc, desc */
 function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: SortField; sortDir: SortDir }) {
-  if (sortField !== field) return <ChevronsUpDown size={11} style={{ opacity: 0.35, marginLeft: 3, verticalAlign: 'middle' }} />;
+  if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 opacity-35 ml-1 inline-block align-middle" />;
   return sortDir === 'asc'
-    ? <ChevronUp size={11} style={{ color: 'var(--primary)', marginLeft: 3, verticalAlign: 'middle' }} />
-    : <ChevronDown size={11} style={{ color: 'var(--primary)', marginLeft: 3, verticalAlign: 'middle' }} />;
+    ? <ChevronUp className="w-3 h-3 text-primary ml-1 inline-block align-middle" />
+    : <ChevronDown className="w-3 h-3 text-primary ml-1 inline-block align-middle" />;
 }
 
 export default function LeadLogTable({ initialLeads, members, profiles, user }: Props) {
@@ -215,244 +219,231 @@ export default function LeadLogTable({ initialLeads, members, profiles, user }: 
   const activeFilterCount = [filterStatus, filterSource, filterMember, filterEngagement, filterBidType, filterProfile, filterHot ? 'hot' : ''].filter(Boolean).length;
 
   return (
-    <div className="animate-fade-in">
+    <Card className="animate-fade-in p-0 overflow-hidden border">
       {/* ── Toolbar ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div className="flex items-center gap-2 p-4 border-b flex-wrap bg-card">
         {/* Search */}
-        <div style={{ position: 'relative', flex: '1 1 200px' }}>
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input placeholder="Search projects…" value={search} onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-            style={{ ...inputStyle, paddingLeft: 32, width: '100%', boxSizing: 'border-box' }} />
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input 
+            placeholder="Search projects…" 
+            value={search} 
+            onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+            className="pl-9 h-9 text-xs"
+          />
         </div>
 
         {/* Status */}
-        <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); resetPage(); }} style={selectStyle}>
-          <option value="">All Statuses</option>
-          {STATUSES.map((s) => <option key={s}>{s}</option>)}
-        </select>
+        <Select value={filterStatus || 'all'} onValueChange={(v) => { setFilterStatus(v === 'all' || !v ? '' : v); resetPage(); }}>
+          <SelectTrigger className="w-[130px] h-9 text-xs"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Statuses</SelectItem>{STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
 
         {/* Source */}
-        <select value={filterSource} onChange={(e) => { setFilterSource(e.target.value); resetPage(); }} style={selectStyle}>
-          <option value="">All Sources</option>
-          {LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}
-        </select>
+        <Select value={filterSource || 'all'} onValueChange={(v) => { setFilterSource(v === 'all' || !v ? '' : v); resetPage(); }}>
+          <SelectTrigger className="w-[130px] h-9 text-xs"><SelectValue placeholder="All Sources" /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Sources</SelectItem>{LEAD_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
 
         {/* Engagement Type */}
-        <select value={filterEngagement} onChange={(e) => { setFilterEngagement(e.target.value); resetPage(); }} style={selectStyle}>
-          <option value="">All Types</option>
-          {ENGAGEMENT_TYPES.map((e) => <option key={e}>{e}</option>)}
-        </select>
+        <Select value={filterEngagement || 'all'} onValueChange={(v) => { setFilterEngagement(v === 'all' || !v ? '' : v); resetPage(); }}>
+          <SelectTrigger className="w-[120px] h-9 text-xs"><SelectValue placeholder="All Types" /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Types</SelectItem>{ENGAGEMENT_TYPES.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+        </Select>
 
         {/* Bid Type */}
-        <select value={filterBidType} onChange={(e) => { setFilterBidType(e.target.value); resetPage(); }} style={selectStyle}>
-          <option value="">All Bids</option>
-          {BID_TYPES.map((b) => <option key={b}>{b}</option>)}
-        </select>
+        <Select value={filterBidType || 'all'} onValueChange={(v) => { setFilterBidType(v === 'all' || !v ? '' : v); resetPage(); }}>
+          <SelectTrigger className="w-[120px] h-9 text-xs"><SelectValue placeholder="All Bids" /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Bids</SelectItem>{BID_TYPES.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+        </Select>
 
         {/* Profile */}
-        <select value={filterProfile} onChange={(e) => { setFilterProfile(e.target.value); resetPage(); }} style={selectStyle}>
-          <option value="">All Profiles</option>
-          {profiles.map((p) => <option key={p.id} value={p.id}>{p.profileName}</option>)}
-        </select>
+        <Select value={filterProfile || 'all'} onValueChange={(v) => { setFilterProfile(v === 'all' || !v ? '' : v); resetPage(); }}>
+          <SelectTrigger className="w-[140px] h-9 text-xs"><SelectValue placeholder="All Profiles" /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Profiles</SelectItem>{profiles.map(p => <SelectItem key={p.id} value={p.id}>{p.profileName}</SelectItem>)}</SelectContent>
+        </Select>
 
         {/* Starred Only toggle */}
-        <button
-          onClick={() => { setFilterHot(h => !h); resetPage(); }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            padding: '7px 12px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            border: filterHot ? '1px solid rgba(245,158,11,0.5)' : '1px solid var(--border)',
-            background: filterHot ? 'rgba(245,158,11,0.12)' : 'var(--surface-2)',
-            color: filterHot ? '#f59e0b' : 'var(--text-muted)',
-            transition: 'all 0.15s',
-          }}
-        >
-          <Star size={13} fill={filterHot ? '#f59e0b' : 'none'} />
+        <Button variant={filterHot ? "default" : "outline"} size="sm" className={`h-9 text-xs ${filterHot ? 'bg-amber-500 hover:bg-amber-600' : ''}`} onClick={() => { setFilterHot(!filterHot); resetPage(); }}>
+          <Star className={`w-3.5 h-3.5 mr-1 ${filterHot ? 'fill-current' : ''}`} />
           Starred
-        </button>
+        </Button>
 
         {/* BD Member (admin only) */}
         {isAdmin && (
-          <select value={filterMember} onChange={(e) => { setFilterMember(e.target.value); resetPage(); }} style={selectStyle}>
-            <option value="">All Members</option>
-            {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-          </select>
+          <Select value={filterMember || 'all'} onValueChange={(v) => { setFilterMember(v === 'all' || !v ? '' : v); resetPage(); }}>
+            <SelectTrigger className="w-[130px] h-9 text-xs"><SelectValue placeholder="All Members" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">All Members</SelectItem>{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+          </Select>
         )}
 
         {/* Stats */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{sorted.length} entries</span>
+        <div className="flex items-center gap-2 ml-auto">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{sorted.length} entries</span>
           {activeFilterCount > 0 && (
-            <button
-              onClick={() => { setFilterStatus(''); setFilterSource(''); setFilterMember(''); setFilterEngagement(''); setFilterBidType(''); setFilterProfile(''); setFilterHot(false); setSearch(''); resetPage(); }}
-              style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.1)', color: '#ef4444', cursor: 'pointer' }}
-            >
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] text-destructive hover:bg-destructive/10" onClick={() => { setFilterStatus(''); setFilterSource(''); setFilterMember(''); setFilterEngagement(''); setFilterBidType(''); setFilterProfile(''); setFilterHot(false); setSearch(''); resetPage(); }}>
               ✕ Clear {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
-            </button>
+            </Button>
           )}
+          <Button size="sm" onClick={() => setShowQuickAdd(true)} className="h-9 text-xs ml-1">
+            <Plus className="w-4 h-4 mr-1" /> Quick Add
+          </Button>
         </div>
-
-        <button onClick={() => setShowQuickAdd(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 4, background: 'var(--primary)', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 13, fontWeight: 600 }}>
-          <Plus size={15} />Quick Add
-        </button>
       </div>
 
       {/* ── Table ──────────────────────────────────────────────────── */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ background: 'var(--surface-2)' }}>
-                {/* Sortable column headers */}
-                <th onClick={() => toggleSort('date')} style={thStyle('date')}>Date <SortIcon field="date" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('projectTitle')} style={thStyle('projectTitle')}>Project Title <SortIcon field="projectTitle" sortField={sortField} sortDir={sortDir} /></th>
-                {isAdmin && <th onClick={() => toggleSort('assignedToId')} style={thStyle('assignedToId')}>BD Member <SortIcon field="assignedToId" sortField={sortField} sortDir={sortDir} /></th>}
-                <th onClick={() => toggleSort('leadSource')} style={thStyle('leadSource')}>Source <SortIcon field="leadSource" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('profileUsedId')} style={thStyle('profileUsedId')}>Profile <SortIcon field="profileUsedId" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('engagementType')} style={thStyle('engagementType')}>Engagement <SortIcon field="engagementType" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('proposalValue')} style={thStyle('proposalValue')}>Value <SortIcon field="proposalValue" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('connectsUsed')} style={thStyle('connectsUsed')}>Connects <SortIcon field="connectsUsed" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('bidType')} style={thStyle('bidType')}>Bid Type <SortIcon field="bidType" sortField={sortField} sortDir={sortDir} /></th>
-                <th onClick={() => toggleSort('status')} style={thStyle('status')}>Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} /></th>
-                <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>Remarks</th>
-                <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginated.map((lead, i) => {
+      <div className="overflow-x-auto">
+        <Table className="text-xs">
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              {/* Sortable column headers */}
+              <TableHead onClick={() => toggleSort('date')} className="cursor-pointer whitespace-nowrap h-9 px-3">Date <SortIcon field="date" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('projectTitle')} className="cursor-pointer whitespace-nowrap h-9 px-3">Project Title <SortIcon field="projectTitle" sortField={sortField} sortDir={sortDir} /></TableHead>
+              {isAdmin && <TableHead onClick={() => toggleSort('assignedToId')} className="cursor-pointer whitespace-nowrap h-9 px-3">BD Member <SortIcon field="assignedToId" sortField={sortField} sortDir={sortDir} /></TableHead>}
+              <TableHead onClick={() => toggleSort('leadSource')} className="cursor-pointer whitespace-nowrap h-9 px-3">Source <SortIcon field="leadSource" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('profileUsedId')} className="cursor-pointer whitespace-nowrap h-9 px-3">Profile <SortIcon field="profileUsedId" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('engagementType')} className="cursor-pointer whitespace-nowrap h-9 px-3">Engagement <SortIcon field="engagementType" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('proposalValue')} className="cursor-pointer whitespace-nowrap h-9 px-3">Value <SortIcon field="proposalValue" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('connectsUsed')} className="cursor-pointer whitespace-nowrap h-9 px-3">Connects <SortIcon field="connectsUsed" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('bidType')} className="cursor-pointer whitespace-nowrap h-9 px-3">Bid Type <SortIcon field="bidType" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead onClick={() => toggleSort('status')} className="cursor-pointer whitespace-nowrap h-9 px-3">Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} /></TableHead>
+              <TableHead className="whitespace-nowrap h-9 px-3 text-muted-foreground font-semibold">Remarks</TableHead>
+              <TableHead className="whitespace-nowrap h-9 px-3 text-muted-foreground font-semibold">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.map((lead, i) => {
                 const isEditing = editingId === lead.id;
                 const canEdit   = isAdmin || lead.assignedToId === user.bdMemberId;
                 const isHovered = hoverRowId === lead.id;
                 return (
-                  <tr key={lead.id}
+                  <TableRow key={lead.id}
                     onMouseEnter={() => setHoverRowId(lead.id)}
                     onMouseLeave={() => setHoverRowId(null)}
-                    style={{
-                      background: isEditing
-                        ? 'rgba(15, 108, 189, 0.05)'
-                        : lead.isHot
-                          ? isHovered ? 'rgba(245,158,11,0.18)' : 'rgba(245,158,11,0.09)'
-                          : isHovered ? 'rgba(15, 108, 189, 0.05)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
-                      transition: 'background 0.1s',
-                      borderLeft: lead.isHot ? '3px solid #f59e0b' : '3px solid transparent',
-                    }}>
-                    <td style={{ padding: '9px 12px', color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>
+                    className={`group ${lead.isHot ? 'border-l-[3px] border-l-amber-500' : 'border-l-[3px] border-l-transparent'} ${isEditing ? 'bg-primary/5' : lead.isHot ? isHovered ? 'bg-amber-500/15' : 'bg-amber-500/10' : ''}`}
+                    >
+                    <TableCell className="p-2.5 text-muted-foreground whitespace-nowrap align-top">
                       {isEditing ? <EditableCell value={editDraft.date ?? lead.date} type="date" onChange={(v) => patchDraft('date', v)} /> : formatDate(lead.date)}
-                    </td>
-                    <td style={{ padding: '9px 12px', maxWidth: 220 }}>
+                    </TableCell>
+                    <TableCell className="p-2.5 max-w-[220px] align-top">
                       {isEditing ? <EditableCell value={editDraft.projectTitle ?? lead.projectTitle} onChange={(v) => patchDraft('projectTitle', v)} /> : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500, color: 'var(--text)' }}>{lead.projectTitle}</span>
-                          {lead.upworkLink && <a href={lead.upworkLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', flexShrink: 0 }}><ExternalLink size={12} /></a>}
+                        <div className="flex items-center gap-1.5 font-medium text-foreground">
+                          <span className="truncate">{lead.projectTitle}</span>
+                          {lead.upworkLink && <a href={lead.upworkLink} target="_blank" rel="noopener noreferrer" className="text-muted-foreground shrink-0 hover:text-foreground"><ExternalLink size={12} /></a>}
                         </div>
                       )}
-                    </td>
+                    </TableCell>
                     {isAdmin && (
-                      <td style={{ padding: '9px 12px', color: 'var(--text)', whiteSpace: 'nowrap' }}>
+                      <TableCell className="p-2.5 whitespace-nowrap align-top">
                         {isEditing ? <EditableCell value={editDraft.assignedToId ?? lead.assignedToId} type="select" options={members.map(m => m.id)} onChange={(v) => patchDraft('assignedToId', v)} /> : getMemberName(lead.assignedToId)}
-                      </td>
+                      </TableCell>
                     )}
-                    <td style={{ padding: '9px 12px' }}>
+                    <TableCell className="p-2.5 align-top">
                       {isEditing ? <EditableCell value={editDraft.leadSource ?? lead.leadSource} type="select" options={LEAD_SOURCES} onChange={(v) => patchDraft('leadSource', v)} /> :
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--surface-2)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{lead.leadSource}</span>}
-                    </td>
-                    <td style={{ padding: '9px 12px', color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>
+                        <span className="text-[10px] px-2 py-0.5 rounded border bg-muted/50 text-muted-foreground">{lead.leadSource}</span>}
+                    </TableCell>
+                    <TableCell className="p-2.5 text-muted-foreground whitespace-nowrap align-top">
                       {isEditing ? <EditableCell value={editDraft.profileUsedId ?? lead.profileUsedId ?? ''} type="select" options={['', ...profiles.map(p => p.id)]} onChange={(v) => patchDraft('profileUsedId', v)} /> : getProfileName(lead.profileUsedId)}
-                    </td>
-                    <td style={{ padding: '9px 12px' }}>
+                    </TableCell>
+                    <TableCell className="p-2.5 align-top">
                       {isEditing
                         ? <EditableCell value={editDraft.engagementType ?? lead.engagementType} type="select" options={ENGAGEMENT_TYPES} onChange={(v) => patchDraft('engagementType', v)} />
-                        : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagementType === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagementType}</span>}
-                    </td>
-                    <td style={{ padding: '9px 12px', color: '#22d3ee', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                        : <span className={`text-[10px] px-2 py-0.5 rounded border ${lead.engagementType === 'Hourly' ? 'bg-cyan-500/10 text-cyan-500 border-cyan-500/30' : 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30'}`}>{lead.engagementType}</span>}
+                    </TableCell>
+                    <TableCell className="p-2.5 text-cyan-500 font-semibold whitespace-nowrap align-top">
                       {isEditing
                         ? <EditableCell value={editDraft.proposalValue ?? lead.proposalValue} type="number" onChange={(v) => patchDraft('proposalValue', v)} />
                         : (
-                          <div>
+                          <div className="flex flex-col gap-0.5">
                             <div>{formatCurrency(lead.proposalValue)}</div>
                             {lead.engagementType === 'Hourly' && lead.hourlyRate && lead.estimatedHours && (
-                              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>${lead.hourlyRate}/hr × {lead.estimatedHours}h</div>
+                              <div className="text-[9px] text-muted-foreground font-normal">${lead.hourlyRate}/hr × {lead.estimatedHours}h</div>
                             )}
                           </div>
                         )}
-                    </td>
-                    <td style={{ padding: '9px 12px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                    </TableCell>
+                    <TableCell className="p-2.5 text-muted-foreground text-center align-top">
                       {isEditing ? <EditableCell value={editDraft.connectsUsed ?? lead.connectsUsed} type="number" onChange={(v) => patchDraft('connectsUsed', v)} /> : lead.connectsUsed}
-                    </td>
-                    <td style={{ padding: '9px 12px' }}>
+                    </TableCell>
+                    <TableCell className="p-2.5 align-top">
                       {isEditing ? <EditableCell value={editDraft.bidType ?? lead.bidType} type="select" options={BID_TYPES} onChange={(v) => patchDraft('bidType', v)} /> :
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.bidType === 'Boosted' ? 'rgba(245,158,11,0.15)' : 'rgba(99,102,241,0.15)', color: lead.bidType === 'Boosted' ? '#f59e0b' : '#818cf8', border: `1px solid ${lead.bidType === 'Boosted' ? 'rgba(245,158,11,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.bidType}</span>}
-                    </td>
-                    <td style={{ padding: '9px 12px' }}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded border ${lead.bidType === 'Boosted' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'}`}>{lead.bidType}</span>}
+                    </TableCell>
+                    <TableCell className="p-2.5 align-top">
                       {isEditing ? <EditableCell value={editDraft.status ?? lead.status} type="select" options={STATUSES} onChange={(v) => patchDraft('status', v)} /> : <StatusBadge status={lead.status} size="sm" />}
-                    </td>
-                    <td style={{ padding: '9px 12px', color: 'var(--text-muted)', fontSize: 12, maxWidth: 150 }}>
+                    </TableCell>
+                    <TableCell className="p-2.5 text-muted-foreground max-w-[150px] align-top">
                       {isEditing ? <EditableCell value={editDraft.remarks ?? lead.remarks ?? ''} onChange={(v) => patchDraft('remarks', v)} /> :
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{lead.remarks || '—'}</span>}
-                    </td>
-                    <td style={{ padding: '9px 12px', whiteSpace: 'nowrap' }}>
+                        <span className="truncate block opacity-80">{lead.remarks || '—'}</span>}
+                    </TableCell>
+                    <TableCell className="p-2.5 whitespace-nowrap align-top">
                       {isEditing ? (
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={saveEdit} disabled={saving} style={{ padding: '5px 10px', borderRadius: 4, border: 'none', background: '#107C41', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}><Check size={12} />{saving ? '…' : 'Save'}</button>
-                          <button onClick={cancelEdit} style={{ padding: '5px 10px', borderRadius: 4, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}><X size={12} />Cancel</button>
+                        <div className="flex items-center gap-1.5">
+                          <Button variant="default" size="sm" className="h-6 px-2 text-[10px] bg-green-600 hover:bg-green-700" onClick={saveEdit} disabled={saving}>
+                            <Check className="w-3 h-3 mr-1" />{saving ? '…' : 'Save'}
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={cancelEdit}>
+                            <X className="w-3 h-3 mr-1" />Cancel
+                          </Button>
                         </div>
                       ) : canEdit ? (
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {/* Star / Hot toggle */}
-                          <button
-                            onClick={() => toggleHot(lead)}
-                            title={lead.isHot ? 'Unmark hot' : 'Mark as hot'}
-                            style={{ width: 28, height: 28, borderRadius: 6, border: `1px solid ${lead.isHot ? 'rgba(245,158,11,0.4)' : 'var(--border)'}`, background: lead.isHot ? 'rgba(245,158,11,0.12)' : 'transparent', color: lead.isHot ? '#f59e0b' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
-                            <Star size={13} fill={lead.isHot ? '#f59e0b' : 'none'} />
-                          </button>
-                          <button onClick={() => startEdit(lead)} style={{ width: 28, height: 28, borderRadius: 4, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Pencil size={13} /></button>
-                          {isAdmin && <button onClick={() => deleteLead(lead.id)} style={{ width: 28, height: 28, borderRadius: 4, border: '1px solid rgba(239,68,68,0.3)', background: 'transparent', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={13} /></button>}
+                          <Button
+                            variant={lead.isHot ? "default" : "outline"} size="icon" className={`w-6 h-6 ${lead.isHot ? 'bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30' : 'text-muted-foreground'}`}
+                            onClick={() => toggleHot(lead)} title={lead.isHot ? 'Unmark hot' : 'Mark as hot'}>
+                            <Star className={`w-3 h-3 ${lead.isHot ? 'fill-current' : ''}`} />
+                          </Button>
+                          <Button variant="outline" size="icon" className="w-6 h-6 text-muted-foreground" onClick={() => startEdit(lead)}>
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          {isAdmin && (
+                            <Button variant="outline" size="icon" className="w-6 h-6 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => deleteLead(lead.id)}>
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                       ) : null}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {paginated.length === 0 && (
-                <tr><td colSpan={isAdmin ? 13 : 12} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No lead entries found. Click <strong>Quick Add</strong> to log your first lead.</td></tr>
+                <TableRow><TableCell colSpan={isAdmin ? 13 : 12} className="p-10 text-center text-muted-foreground">No lead entries found. Click <strong>Quick Add</strong> to log your first lead.</TableCell></TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
 
         {/* ── Pagination Bar ─────────────────────────────────── */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        <div className="p-3 border-t flex items-center justify-between flex-wrap gap-2 bg-muted/20">
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-muted-foreground">
               Showing {sorted.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, sorted.length)} of {sorted.length}
             </span>
-            <select
-              value={pageSize}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 4, padding: '4px 8px', fontSize: 12, color: 'var(--text)', cursor: 'pointer', outline: 'none' }}
-            >
-              {PAGE_SIZES.map(s => <option key={s} value={s}>{s} / page</option>)}
-            </select>
+            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+              <SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZES.map(s => <SelectItem key={s} value={String(s)}>{s} / page</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1} style={{ ...paginationBtnStyle(), opacity: safePage === 1 ? 0.4 : 1 }}>
-              <ChevronLeft size={14} />
-            </button>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
             {getPageNums().map(n => (
-              <button key={n} onClick={() => setPage(n)} style={paginationBtnStyle(n === safePage)}>{n}</button>
+              <Button key={n} variant={n === safePage ? "default" : "outline"} size="icon" className="w-8 h-8 text-xs" onClick={() => setPage(n)}>{n}</Button>
             ))}
-            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} style={{ ...paginationBtnStyle(), opacity: safePage === totalPages ? 0.4 : 1 }}>
-              <ChevronRight size={14} />
-            </button>
+            <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
-      </div>
 
       {showQuickAdd && (
         <QuickAddForm user={user} members={members} profiles={profiles} onAdd={handleAddLead} onClose={() => setShowQuickAdd(false)} />
       )}
-    </div>
+    </Card>
   );
 }

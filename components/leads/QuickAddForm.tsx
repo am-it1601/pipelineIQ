@@ -4,6 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import type { LeadLogEntry, BDMember, UpworkProfile, User, LeadStatus, LeadSource, BidType, EngagementType } from '@/lib/types';
 import { format } from 'date-fns';
 import { X, Save, PlusCircle, Zap } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const LEAD_SOURCES: LeadSource[]   = ['Upwork', 'Referral', 'LinkedIn', 'Direct'];
 const BID_TYPES: BidType[]         = ['Normal', 'Boosted'];
@@ -132,125 +137,107 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
   const autoValue = isHourly ? (form.hourlyRate ?? 0) * (form.estimatedHours ?? 0) : null;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, backdropFilter: 'blur(4px)' }}
-      />
-
-      {/* Slide-over panel */}
-      <div
-        style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0, width: 500,
-          background: 'var(--surface)', borderLeft: '1px solid var(--border)',
-          zIndex: 101, display: 'flex', flexDirection: 'column',
-          animation: 'slideIn 0.2s ease-out',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Header */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Zap size={18} color="var(--primary)" />
-              Quick Add Lead
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              {added > 0 ? `✓ ${added} lead${added > 1 ? 's' : ''} added this session` : 'Fill required fields and save'}
+    <Sheet open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <SheetContent className="sm:max-w-[500px] w-[500px] overflow-hidden p-0 flex flex-col" style={{ background: 'var(--surface)', borderLeft: '1px solid var(--border)' }}>
+        <SheetHeader className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center justify-between pointer-events-none">
+            <div className="text-left">
+              <SheetTitle className="flex items-center gap-2 text-base font-bold" style={{ color: 'var(--text)' }}>
+                <Zap size={18} color="var(--primary)" />
+                Quick Add Lead
+              </SheetTitle>
+              <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                {added > 0 ? `✓ ${added} lead${added > 1 ? 's' : ''} added this session` : 'Fill required fields and save'}
+              </div>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-            <X size={18} />
-          </button>
-        </div>
+        </SheetHeader>
 
         {/* Form body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-          <style>{`@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             {/* Date */}
-            <div>
-              <label style={labelStyle}>Date *</label>
-              <input type="date" value={form.date} onChange={(e) => patch('date', e.target.value)} style={fieldStyle} />
+            <div className="space-y-1.5">
+              <Label>Date *</Label>
+              <Input type="date" value={form.date} onChange={(e) => patch('date', e.target.value)} />
             </div>
 
             {/* Lead Source */}
-            <div>
-              <label style={labelStyle}>Lead Source *</label>
-              <select value={form.leadSource} onChange={(e) => patch('leadSource', e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}
-              </select>
+            <div className="space-y-1.5">
+              <Label>Lead Source *</Label>
+              <Select value={form.leadSource} onValueChange={(v) => patch('leadSource', v as LeadSource)}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Project Title */}
-          <div style={{ marginTop: 14 }}>
-            <label style={labelStyle}>Project Title *</label>
-            <input
+          <div className="space-y-1.5">
+            <Label>Project Title *</Label>
+            <Input
               ref={titleRef}
               type="text"
               placeholder="e.g. React Dashboard for SaaS Platform"
               value={form.projectTitle}
               onChange={(e) => patch('projectTitle', e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSave(true); }}
-              style={fieldStyle}
-              onFocus={(e) => (e.target.style.borderColor = 'var(--primary)')}
-              onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
             />
           </div>
 
           {/* Upwork Link */}
           {isUpwork && (
-            <div style={{ marginTop: 14 }}>
-              <label style={labelStyle}>Upwork Job Link</label>
-              <input
+            <div className="space-y-1.5">
+              <Label>Upwork Job Link</Label>
+              <Input
                 type="text"
                 placeholder="https://upwork.com/jobs/..."
                 value={form.upworkLink ?? ''}
                 onChange={(e) => patch('upworkLink', e.target.value)}
-                style={fieldStyle}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--primary)')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
               />
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+          <div className="grid grid-cols-2 gap-4">
             {/* Profile */}
             {isUpwork && (
-              <div>
-                <label style={labelStyle}>Profile Used</label>
-                <select value={form.profileUsedId ?? ''} onChange={(e) => patch('profileUsedId', e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                  <option value="">— Select —</option>
-                  {profiles.filter((p) => p.status === 'active').map((p) => (
-                    <option key={p.id} value={p.id}>{p.profileName}</option>
-                  ))}
-                </select>
+              <div className="space-y-1.5">
+                <Label>Profile Used</Label>
+                <Select value={form.profileUsedId ?? ''} onValueChange={(v) => patch('profileUsedId', v ?? '')}>
+                  <SelectTrigger><SelectValue placeholder="— Select —" /></SelectTrigger>
+                  <SelectContent>
+                    {profiles.filter((p) => p.status === 'active').map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.profileName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
             {/* Assigned To */}
-            <div>
-              <label style={labelStyle}>Assigned To *</label>
-              <select
+            <div className="space-y-1.5">
+              <Label>Assigned To *</Label>
+              <Select
                 value={form.assignedToId}
-                onChange={(e) => patch('assignedToId', e.target.value)}
-                style={{ ...fieldStyle, cursor: 'pointer' }}
+                onValueChange={(v) => patch('assignedToId', v ?? '')}
                 disabled={user.role === 'bd'}
               >
-                {members.filter((m) => m.status === 'active').map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {members.filter((m) => m.status === 'active').map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* ── Engagement Type Toggle ───────────────────────── */}
-          <div style={{ marginTop: 14 }}>
-            <label style={labelStyle}>Engagement Type *</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+          {/* Engagement Type Toggle */}
+          <div className="space-y-1.5">
+            <Label>Engagement Type *</Label>
+             <div className="flex gap-2">
               {ENGAGEMENT_TYPES.map((et) => (
                 <button
                   key={et}
@@ -264,86 +251,75 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
             </div>
           </div>
 
-          {/* ── Hourly Fields ─────────────────────────────────── */}
+          {/* Hourly Fields */}
           {isHourly ? (
-            <div style={{ marginTop: 14, padding: '14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 4 }}>
-              <div style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            <div className="p-3.5 rounded-md border" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
+              <div className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--accent)' }}>
                 ⏱ Hourly Engagement
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={labelStyle}>Hourly Rate ($/hr) *</label>
-                  <input
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Hourly Rate ($/hr) *</Label>
+                  <Input
                     type="number" min={1} step={1}
                     placeholder="e.g. 45"
                     value={form.hourlyRate ?? ''}
                     onChange={(e) => patch('hourlyRate', e.target.value === '' ? undefined : Number(e.target.value))}
-                    style={fieldStyle}
-                    onFocus={(e) => (e.target.style.borderColor = 'var(--accent)')}
-                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
-                <div>
-                  <label style={labelStyle}>Estimated Hours *</label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label>Estimated Hours *</Label>
+                  <Input
                     type="number" min={1} step={1}
                     placeholder="e.g. 160"
                     value={form.estimatedHours ?? ''}
                     onChange={(e) => patch('estimatedHours', e.target.value === '' ? undefined : Number(e.target.value))}
-                    style={fieldStyle}
-                    onFocus={(e) => (e.target.style.borderColor = 'var(--accent)')}
-                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                   />
                 </div>
               </div>
               {/* Auto-computed total */}
-              <div style={{ marginTop: 10, padding: '8px 12px', background: 'var(--surface)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Contract Value (auto)</span>
-                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)' }}>
+              <div className="mt-2.5 p-2 rounded flex items-center justify-between border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Total Contract Value (auto)</span>
+                <span className="text-base font-bold" style={{ color: 'var(--accent)' }}>
                   ${autoValue?.toLocaleString() ?? '0'}
                 </span>
               </div>
             </div>
           ) : (
-            /* ── Fixed Price Field ─────────────────────────── */
-            <div style={{ marginTop: 14 }}>
-              <label style={labelStyle}>Proposal Value (USD) *</label>
-              <input
+            <div className="space-y-1.5">
+              <Label>Proposal Value (USD) *</Label>
+              <Input
                 type="number" min={0}
                 value={form.proposalValue}
                 onChange={(e) => patch('proposalValue', Number(e.target.value))}
-                style={fieldStyle}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--primary)')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
               />
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
-            {/* Connects Used */}
-            <div>
-              <label style={labelStyle}>Connects Used</label>
-              <input
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Connects Used</Label>
+              <Input
                 type="number" min={0}
                 value={form.connectsUsed}
                 onChange={(e) => patch('connectsUsed', Number(e.target.value))}
-                style={fieldStyle}
               />
             </div>
-
-            {/* Status */}
-            <div>
-              <label style={labelStyle}>Status *</label>
-              <select value={form.status} onChange={(e) => patch('status', e.target.value as LeadStatus)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {STATUSES.map((s) => <option key={s}>{s}</option>)}
-              </select>
+            <div className="space-y-1.5">
+              <Label>Status *</Label>
+              <Select value={form.status} onValueChange={(v) => patch('status', v as LeadStatus)}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Bid Type */}
-          <div style={{ marginTop: 14 }}>
-            <label style={labelStyle}>Bid Type *</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+          <div className="space-y-1.5">
+            <Label>Bid Type *</Label>
+            <div className="flex gap-2">
               {BID_TYPES.map((bt) => (
                 <button
                   key={bt}
@@ -357,49 +333,40 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
             </div>
           </div>
 
-          {/* Remarks */}
-          <div style={{ marginTop: 14 }}>
-            <label style={labelStyle}>Remarks</label>
+          <div className="space-y-1.5">
+            <Label>Remarks</Label>
             <textarea
+              className="flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Optional notes..."
               value={form.remarks ?? ''}
               onChange={(e) => patch('remarks', e.target.value)}
               rows={2}
-              style={{ ...fieldStyle, resize: 'vertical', fontFamily: 'inherit' }}
+              style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text)' }}
             />
           </div>
         </div>
 
         {/* Footer actions */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-          <button
+        <div className="absolute flex gap-2.5 p-4 border-t bottom-0 w-full" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          <Button
+            variant="outline"
+            className="flex-1"
             onClick={() => handleSave(true)}
             disabled={saving}
-            style={{
-              flex: 1, padding: '11px', borderRadius: 4, border: '1px solid var(--primary)',
-              background: 'var(--surface-2)', color: 'var(--primary)',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
           >
-            <PlusCircle size={15} />
+            <PlusCircle size={15} className="mr-1.5" />
             Save &amp; New
-          </button>
-          <button
+          </Button>
+          <Button
+            className="flex-1"
             onClick={() => handleSave(false)}
             disabled={saving}
-            style={{
-              flex: 1, padding: '11px', borderRadius: 4, border: 'none',
-              background: 'var(--primary)',
-              color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
           >
-            <Save size={15} />
+            <Save size={15} className="mr-1.5" />
             {saving ? 'Saving…' : 'Save & Close'}
-          </button>
+          </Button>
         </div>
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

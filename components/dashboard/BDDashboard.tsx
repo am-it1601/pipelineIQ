@@ -20,6 +20,7 @@ import { formatCurrency, formatPercent, formatDate, getDateRange, filterLeadsByD
 import KPICard from '@/components/ui/KPICard';
 import StatusBadge from '@/components/ui/StatusBadge';
 import SectionHeader from '@/components/ui/SectionHeader';
+import { Card } from '@/components/ui/card';
 import DashboardFilter, { DEFAULT_FILTERS, DashboardFilters } from '@/components/ui/DashboardFilter';
 import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -88,12 +89,7 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
   // Profile performance across all profiles (team-wide, read-only for BD)
   const profileMomentum = getProfileMomentum(leads, profiles);
 
-  const cardStyle = {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    padding: '20px',
-  };
+  const cardStyle = "p-5 bg-card text-card-foreground border rounded-lg shadow-sm";
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="animate-fade-in">
@@ -173,7 +169,7 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
 
       {/* ── My Engagement Mix ─────────────────────────────────── */}
       {myLeads.length > 0 && (
-        <div style={{ ...cardStyle }}>
+        <Card className={cardStyle}>
           <SectionHeader title="My Engagement Mix" subtitle="Your Fixed-price vs Hourly breakdown" />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
             <div style={{ padding: '14px', background: 'rgba(99,102,241,0.1)', borderRadius: 10, border: '1px solid rgba(99,102,241,0.2)' }}>
@@ -197,14 +193,14 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{formatCurrency(myEng.hourlyPipelineValue)} active hourly value</div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* ── Avg Bids Per Day + WoW Snapshot ──────────────── */}
       {myAvgBidsRow && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
           {/* Personal Pace Card */}
-          <div style={{ ...cardStyle }}>
+          <Card className={cardStyle}>
             <SectionHeader title="My Daily Bidding Pace" subtitle="Average bids submitted per active day" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
               <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(99,102,241,0.1)', borderRadius: 10 }}>
@@ -224,10 +220,10 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
                 <div style={{ fontSize: 28, fontWeight: 700, color: '#f59e0b' }}>{myAvgBidsRow.activeDays}</div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* WoW Momentum */}
-          <div style={cardStyle}>
+          <Card className={cardStyle}>
             <SectionHeader title="My Weekly Momentum" subtitle="This week vs last week" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div style={{ padding: '14px', background: 'var(--surface-2)', borderRadius: 4, border: '1px solid var(--border)' }}>
@@ -258,13 +254,13 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
                 <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', marginTop: 2 }}>{formatPercent(cost.normalWinRate)}</div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Charts Row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 16 }}>
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="My Weekly Activity" subtitle="Bids & wins over last 8 weeks" />
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weekly} barGap={2}>
@@ -277,9 +273,9 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
               <Bar dataKey="wins" name="Wins" fill="var(--success)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
 
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="My Conversion Funnel" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
             {funnel.map((step, i) => (
@@ -294,11 +290,11 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Monthly Trend */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader title="My Monthly Trend" subtitle="Last 6 months" />
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={monthly}>
@@ -316,10 +312,10 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
             <Area type="monotone" dataKey="wins" name="Wins" stroke="var(--success)" strokeWidth={2} fill="none" dot={{ fill: 'var(--success)', r: 3 }} />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
 
       {/* ── Upwork Profile Performance (team-wide, read-only for BD) ── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader
           title="Upwork Profile Performance"
           subtitle="Team-wide profile stats — overall vs recent 4-week win rate"
@@ -375,10 +371,10 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Recent Leads */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader title="My Recent Leads" subtitle={`Last ${recentLeads.length} entries`} />
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
@@ -422,7 +418,7 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
             })}
           </tbody>
         </table>
-      </div>
+      </Card>
 
     </div>
   );

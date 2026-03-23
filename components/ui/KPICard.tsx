@@ -1,5 +1,7 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 interface KPICardProps {
   title: string;
   value: string | number;
@@ -23,87 +25,60 @@ export default function KPICard({
   const deltaColor = delta === undefined ? undefined : deltaPositive ? '#10b981' : '#ef4444';
 
   return (
-    <div
-      className="animate-fade-in"
+    <Card
+      className={`hover:!shadow !shadow-sm animate-fade-in relative overflow-hidden transition-all duration-150 ease-in-out hover:-translate-y-[2px] ${highlight ? 'shadow-md border-opacity-50' : ''}`}
       style={{
         background: highlight
           ? `linear-gradient(135deg, ${accentColor}22, ${accentColor}11)`
           : 'var(--surface)',
-        border: `1px solid ${highlight ? `${accentColor}44` : 'var(--border)'}`,
-        borderRadius: 12,
-        padding: '18px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-        transition: 'transform 0.15s, box-shadow 0.15s',
-        cursor: 'default',
-        position: 'relative',
-        overflow: 'hidden',
+        borderColor: highlight ? `${accentColor}44` : 'var(--border)',
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
-        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${accentColor}22`;
-      }}
+      // onMouseEnter={(e) => {
+      //   (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${accentColor}22`;
+      // }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
         (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
       }}
     >
       {/* Accent glow strip */}
       <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: `linear-gradient(90deg, ${accentColor}, transparent)`,
-        }}
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }}
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>{title}</div>
+      <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-xs font-medium text-muted-foreground" style={{ color: 'var(--text-muted)' }}>
+          {title}
+        </CardTitle>
         {icon && (
           <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: `${accentColor}22`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: accentColor,
-            }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: `${accentColor}22`, color: accentColor }}
           >
             {icon}
           </div>
         )}
-      </div>
+      </CardHeader>
 
-      <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>
-        {value}
-      </div>
+      <CardContent className="p-4 pt-0">
+        <div className="text-2xl font-bold leading-none mb-1.5" style={{ color: 'var(--text)' }}>
+          {value}
+        </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {delta !== undefined && (
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: deltaColor,
-              background: `${deltaColor}22`,
-              padding: '2px 6px',
-              borderRadius: 4,
-            }}
-          >
-            {deltaPositive ? '+' : ''}{delta.toFixed(1)}%
-          </span>
-        )}
-        {subtitle && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{subtitle}</span>
-        )}
-      </div>
-    </div>
+        <div className="flex items-center gap-2">
+          {delta !== undefined && (
+            <span
+              className="text-[11px] font-semibold px-1.5 py-0.5 rounded"
+              style={{ color: deltaColor, background: `${deltaColor}22` }}
+            >
+              {deltaPositive ? '+' : ''}{delta.toFixed(1)}%
+            </span>
+          )}
+          {subtitle && (
+            <span className="text-[11px] text-muted-foreground" style={{ color: 'var(--text-muted)' }}>{subtitle}</span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

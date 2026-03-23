@@ -1,35 +1,48 @@
 'use client';
 
-import { useState } from 'react';
-import type { LeadLogEntry, BDMember, UpworkProfile } from '@/lib/types';
-import {
-  getActivityKPIs,
-  getConversionKPIs,
-  getCostKPIs,
-  getPipelineKPIs,
-  getBDPerformance,
-  getProfilePerformance,
-  getWeeklyMetrics,
-  getMonthlyMetrics,
-  getFunnelMetrics,
-  getWoWChange,
-  getMoMChange,
-  getSourceBreakdown,
-  getEngagementTypeKPIs,
-} from '@/lib/kpiEngine';
-import { formatCurrency, formatPercent, formatDate, getDateRange, filterLeadsByDate } from '@/lib/utils';
+import ExtendedKPISections from '@/components/dashboard/ExtendedKPISections';
+import { Card } from '@/components/ui/card';
+import DashboardFilter, { DEFAULT_FILTERS, DashboardFilters } from '@/components/ui/DashboardFilter';
 import KPICard from '@/components/ui/KPICard';
 import SectionHeader from '@/components/ui/SectionHeader';
-import DashboardFilter, { DEFAULT_FILTERS, DashboardFilters } from '@/components/ui/DashboardFilter';
-import ExtendedKPISections from '@/components/dashboard/ExtendedKPISections';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend, AreaChart, Area,
-} from 'recharts';
+  getActivityKPIs,
+  getBDPerformance,
+  getConversionKPIs,
+  getCostKPIs,
+  getEngagementTypeKPIs,
+  getFunnelMetrics,
+  getMoMChange,
+  getMonthlyMetrics,
+  getPipelineKPIs,
+  getProfilePerformance,
+  getSourceBreakdown,
+  getWeeklyMetrics,
+  getWoWChange,
+} from '@/lib/kpiEngine';
+import type { BDMember, LeadLogEntry, UpworkProfile } from '@/lib/types';
+import { filterLeadsByDate, formatCurrency, formatDate, formatPercent, getDateRange } from '@/lib/utils';
 import {
-  Target, TrendingUp, DollarSign, Zap,
-  Award, Activity, Star, ExternalLink,
+  Activity,
+  Award,
+  DollarSign,
+  ExternalLink,
+  Star,
+  Target, TrendingUp,
+  Zap,
 } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis,
+} from 'recharts';
 
 const COLORS = ['#0F6CBD', '#0078D4', '#107C41', '#D83B01', '#A4262C', '#605E5C'];
 
@@ -43,35 +56,30 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
   const [dashFilter, setDashFilter] = useState<DashboardFilters>(DEFAULT_FILTERS);
 
   // Apply global dashboard filter
-  const dateRange  = getDateRange(dashFilter.preset, dashFilter.customFrom, dashFilter.customTo);
+  const dateRange = getDateRange(dashFilter.preset, dashFilter.customFrom, dashFilter.customTo);
   const filteredLeads = filterLeadsByDate(leads, dateRange.from, dateRange.to)
-    .filter((l) => !dashFilter.profileId     || l.profileUsedId === dashFilter.profileId)
+    .filter((l) => !dashFilter.profileId || l.profileUsedId === dashFilter.profileId)
     .filter((l) => !dashFilter.engagementType || l.engagementType === dashFilter.engagementType)
-    .filter((l) => !dashFilter.leadSource     || l.leadSource === dashFilter.leadSource);
+    .filter((l) => !dashFilter.leadSource || l.leadSource === dashFilter.leadSource);
 
   const activeMembers = members.filter((m) => m.status === 'active');
-  const activity    = getActivityKPIs(filteredLeads, activeMembers.length);
-  const conversion  = getConversionKPIs(filteredLeads);
-  const cost        = getCostKPIs(filteredLeads);
-  const pipeline    = getPipelineKPIs(filteredLeads);
-  const weekly      = getWeeklyMetrics(filteredLeads, 8);
-  const monthly     = getMonthlyMetrics(filteredLeads, 6);
-  const funnel      = getFunnelMetrics(filteredLeads);
-  const bdPerf      = getBDPerformance(filteredLeads, members);
+  const activity = getActivityKPIs(filteredLeads, activeMembers.length);
+  const conversion = getConversionKPIs(filteredLeads);
+  const cost = getCostKPIs(filteredLeads);
+  const pipeline = getPipelineKPIs(filteredLeads);
+  const weekly = getWeeklyMetrics(filteredLeads, 8);
+  const monthly = getMonthlyMetrics(filteredLeads, 6);
+  const funnel = getFunnelMetrics(filteredLeads);
+  const bdPerf = getBDPerformance(filteredLeads, members);
   const profilePerf = getProfilePerformance(filteredLeads, profiles);
-  const wow         = getWoWChange(filteredLeads);
-  const mom         = getMoMChange(filteredLeads);
-  const sources     = getSourceBreakdown(filteredLeads);
+  const wow = getWoWChange(filteredLeads);
+  const mom = getMoMChange(filteredLeads);
+  const sources = getSourceBreakdown(filteredLeads);
 
   // Hot leads (not filtered by date — always show all hot leads)
-  const hotLeads    = leads.filter((l) => l.isHot).sort((a, b) => b.date.localeCompare(a.date));
+  const hotLeads = leads.filter((l) => l.isHot).sort((a, b) => b.date.localeCompare(a.date));
 
-  const cardStyle = {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    padding: '20px',
-  };
+  const cardStyle = "p-5 bg-card text-card-foreground border rounded-lg shadow-sm";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const customTooltip = ({ active, payload, label }: any) => {
@@ -138,7 +146,9 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
       )}
 
       {/* ── KPI Cards Row 1 ─────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
+      <div
+        className='grid grid-cols-5 gap-4'
+      >
         <KPICard
           title="Total Bids"
           value={activity.totalBids}
@@ -189,7 +199,7 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
       {/* ── Charts Row ──────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 16 }}>
         {/* Weekly Bids Trend */}
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="Weekly Bids & Wins" subtitle="Last 8 weeks" />
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={weekly} barGap={2}>
@@ -202,10 +212,10 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
               <Bar dataKey="wins" name="Wins" fill="var(--success)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
 
         {/* Funnel */}
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="Conversion Funnel" subtitle="All time" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
             {funnel.map((step, i) => (
@@ -235,11 +245,11 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
             <div><div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Discussion → Win</div><div style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>{formatPercent(conversion.discussionToWinRate)}</div></div>
             <div><div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Bids Per Win</div><div style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b' }}>{conversion.bidsPerWin}</div></div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* ── Monthly Trend ───────────────────────────────── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader title="Monthly Performance Trend" subtitle="Last 6 months" />
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={monthly}>
@@ -262,10 +272,10 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
             <Area type="monotone" dataKey="wins" name="Wins" stroke="var(--success)" fill="url(#winsGrad)" strokeWidth={2} dot={{ fill: 'var(--success)', r: 3 }} />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
 
       {/* ── BD Performance Table ─────────────────────────── */}
-      <div style={cardStyle}>
+      <Card className={cardStyle}>
         <SectionHeader title="BD Member Performance" subtitle="All time · current month target" />
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -311,14 +321,14 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* ── Extended KPI Sections ────────────────────── */}
       <ExtendedKPISections leads={leads} members={members} profiles={profiles} />
 
       {/* ── Profile Performance + Source Breakdown ────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="Upwork Profile Performance" />
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
@@ -341,10 +351,10 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
 
         {/* Source Breakdown */}
-        <div style={cardStyle}>
+        <Card className={cardStyle}>
           <SectionHeader title="Lead Source Breakdown" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
             {sources.map((s, i) => (
@@ -381,7 +391,7 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
       {/* ── Engagement Mix Analysis ──────────────────────────────────────── */}
       {(() => {
@@ -395,36 +405,36 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
             <SectionHeader title="Engagement Mix Analysis" subtitle="Fixed-price vs Hourly breakdown across all bids" />
             {/* 4 KPI cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 16 }}>
-              <div style={{ ...cardStyle, borderTop: '3px solid var(--primary)' }}>
+              <Card className={cardStyle} style={{ borderTop: '3px solid var(--primary)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fixed Bids</div>
                 <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', margin: '6px 0' }}>{eng.fixedCount}</div>
                 <div style={{ fontSize: 12, color: 'var(--primary)' }}>{(eng.fixedShare * 100).toFixed(0)}% of all bids</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Win rate: {formatPercent(eng.fixedWinRate)}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Avg value: {formatCurrency(eng.avgFixedValue)}</div>
-              </div>
-              <div style={{ ...cardStyle, borderTop: '3px solid var(--accent)' }}>
+              </Card>
+              <Card className={cardStyle} style={{ borderTop: '3px solid var(--accent)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hourly Bids</div>
                 <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', margin: '6px 0' }}>{eng.hourlyCount}</div>
                 <div style={{ fontSize: 12, color: 'var(--accent)' }}>{(eng.hourlyShare * 100).toFixed(0)}% of all bids</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Win rate: {formatPercent(eng.hourlyWinRate)}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Avg value: {formatCurrency(eng.avgHourlyValue)}</div>
-              </div>
-              <div style={{ ...cardStyle, borderTop: '3px solid var(--success)' }}>
+              </Card>
+              <Card className={cardStyle} style={{ borderTop: '3px solid var(--success)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Avg Hourly Rate</div>
                 <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--success)', margin: '6px 0' }}>${eng.avgHourlyRate.toFixed(0)}<span style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>/hr</span></div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Across {eng.hourlyCount} hourly bids</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Avg est. hours: {eng.avgEstimatedHours.toFixed(0)}h</div>
-              </div>
-              <div style={{ ...cardStyle, borderTop: '3px solid var(--warning)' }}>
+              </Card>
+              <Card className={cardStyle} style={{ borderTop: '3px solid var(--warning)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hourly Pipeline Hrs</div>
                 <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--warning)', margin: '6px 0' }}>{eng.totalHourlyHours.toLocaleString()}<span style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>hrs</span></div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Active hourly engagements</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Hourly pipeline: {formatCurrency(eng.hourlyPipelineValue)}</div>
-              </div>
+              </Card>
             </div>
 
             {/* side-by-side bar chart */}
-            <div style={{ ...cardStyle }}>
+            <Card className={cardStyle}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 14 }}>Fixed vs Hourly — Bids, Pipeline ($K) &amp; Win Rate (%)</div>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={engChartData} barCategoryGap="30%">
@@ -433,12 +443,12 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
                   <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
                   <Tooltip content={customTooltip} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="bids" name="Bids" fill="var(--primary)" radius={[2,2,0,0]} />
-                  <Bar dataKey="pipeline" name="Pipeline ($K)" fill="var(--accent)" radius={[2,2,0,0]} />
-                  <Bar dataKey="winRate" name="Win Rate (%)" fill="var(--success)" radius={[2,2,0,0]} />
+                  <Bar dataKey="bids" name="Bids" fill="var(--primary)" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="pipeline" name="Pipeline ($K)" fill="var(--accent)" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="winRate" name="Win Rate (%)" fill="var(--success)" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           </div>
         );
       })()}

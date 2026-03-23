@@ -1,31 +1,22 @@
 'use client';
-import Sidebar from '@/components/layout/Sidebar';
+import { AppSidebar } from "@/components/app-sidebar";
 import Topbar from '@/components/layout/Topbar';
+import {
+  SidebarInset,
+  SidebarProvider
+} from "@/components/ui/sidebar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div
-        style={{
-          marginLeft: 'var(--sidebar-width)',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-        }}
-      >
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
         <Topbar />
-        <main
-          style={{
-            flex: 1,
-            padding: '24px',
-            background: 'var(--background)',
-          }}
-        >
+        <div className="flex flex-col gap-4 p-4 pt-0">
           {children}
-        </main>
-      </div>
-    </div>
+        </div>
+      </SidebarInset>
+
+    </SidebarProvider >
   );
 }
