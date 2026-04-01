@@ -1,35 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import ThemeSwitch from '@/components/custom/ThemeSwitch';
+import { createClient } from '@/lib/supabase/client';
+import { AlertCircle, ArrowRight, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import { useThemeStore } from '@/store/themeStore';
-import { ArrowRight, Loader2, Lock, Mail, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const login = useAuthStore((s) => s.login);
-  const { theme, toggle } = useThemeStore();
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
 
     setLoading(true);
-    // Simulate network delay for premium feel
-    setTimeout(() => {
-      // Mock Auth Logic
-      if (email.toLowerCase().includes('admin')) {
-        login('u1'); // Admin
-      } else {
-        login('u2'); // BD Member (Priya Mehta)
-      }
-      router.push('/dashboard');
-    }, 800);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(authError.message === 'Invalid login credentials'
+        ? 'Invalid email or password. Please try again.'
+        : authError.message
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Successful login — redirect to dashboard
+    router.push('/dashboard');
+    router.refresh(); // Refresh to pick up new session in middleware
   };
 
   return (
@@ -82,18 +92,32 @@ export default function LoginPage() {
         }}
       >
         {/* Theme Toggle Top Right */}
-        <button
-          onClick={toggle}
-          style={{ position: 'absolute', top: 24, right: 24, width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <ThemeSwitch />
 
         <div style={{ width: '100%', maxWidth: 360, animation: 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
           <h3 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text)', letterSpacing: '-0.02em' }}>Welcome back</h3>
           <p style={{ margin: '0 0 32px 0', color: 'var(--text-muted)', fontSize: 14 }}>Enter your credentials to access the dashboard.</p>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 14px',
+                borderRadius: 4,
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#ef4444',
+                fontSize: 13,
+                fontWeight: 500,
+              }}>
+                <AlertCircle size={16} />
+                {error}
+              </div>
+            )}
+
             {/* Input Group: Email */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginLeft: 2 }}>Work Email</label>
@@ -105,8 +129,8 @@ export default function LoginPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@maverics.com"
+                  onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                  placeholder="you@ciphercru.com"
                   style={{
                     width: '100%',
                     height: 44,
@@ -130,7 +154,6 @@ export default function LoginPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginLeft: 2 }}>Password</label>
-                <a href="#" style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>Forgot?</a>
               </div>
               <div style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
@@ -140,7 +163,7 @@ export default function LoginPage() {
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setError(null); }}
                   placeholder="••••••••"
                   style={{
                     width: '100%',
@@ -159,12 +182,6 @@ export default function LoginPage() {
                   onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
               </div>
-            </div>
-
-            {/* Mock Hint */}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface-2)', padding: '10px 14px', borderRadius: 4, marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--border)' }}>
-              <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-              <span>Hint: Email containing <strong>admin</strong> logs in as Admin. Any other email logs in as BD Member. Any password works.</span>
             </div>
 
             {/* Submit Button */}
@@ -215,7 +232,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }

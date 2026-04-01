@@ -58,9 +58,9 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
   // Apply global dashboard filter
   const dateRange = getDateRange(dashFilter.preset, dashFilter.customFrom, dashFilter.customTo);
   const filteredLeads = filterLeadsByDate(leads, dateRange.from, dateRange.to)
-    .filter((l) => !dashFilter.profileId || l.profileUsedId === dashFilter.profileId)
-    .filter((l) => !dashFilter.engagementType || l.engagementType === dashFilter.engagementType)
-    .filter((l) => !dashFilter.leadSource || l.leadSource === dashFilter.leadSource);
+    .filter((l) => !dashFilter.profileId || l.profile_used_id === dashFilter.profileId)
+    .filter((l) => !dashFilter.engagement_type || l.engagement_type === dashFilter.engagement_type)
+    .filter((l) => !dashFilter.lead_source || l.lead_source === dashFilter.lead_source);
 
   const activeMembers = members.filter((m) => m.status === 'active');
   const activity = getActivityKPIs(filteredLeads, activeMembers.length);
@@ -77,7 +77,7 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
   const sources = getSourceBreakdown(filteredLeads);
 
   // Hot leads (not filtered by date — always show all hot leads)
-  const hotLeads = leads.filter((l) => l.isHot).sort((a, b) => b.date.localeCompare(a.date));
+  const hotLeads = leads.filter((l) => l.is_hot).sort((a, b) => b.date.localeCompare(a.date));
 
   const cardStyle = "p-5 bg-card text-card-foreground border rounded-lg shadow-sm";
 
@@ -127,13 +127,13 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
                     <td style={{ padding: '8px 12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(lead.date)}</td>
                     <td style={{ padding: '8px 12px', fontWeight: 600, color: 'var(--text)', maxWidth: 240 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.projectTitle}</span>
-                        {lead.upworkLink && <a href={lead.upworkLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', flexShrink: 0 }}><ExternalLink size={11} /></a>}
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.project_title}</span>
+                        {lead.upwork_link && <a href={lead.upwork_link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', flexShrink: 0 }}><ExternalLink size={11} /></a>}
                       </div>
                     </td>
-                    <td style={{ padding: '8px 12px', color: 'var(--text)', whiteSpace: 'nowrap' }}>{members.find(m => m.id === lead.assignedToId)?.name ?? '—'}</td>
-                    <td style={{ padding: '8px 12px' }}><span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagementType === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagementType}</span></td>
-                    <td style={{ padding: '8px 12px', color: '#22d3ee', fontWeight: 700, whiteSpace: 'nowrap' }}>{formatCurrency(lead.proposalValue)}</td>
+                    <td style={{ padding: '8px 12px', color: 'var(--text)', whiteSpace: 'nowrap' }}>{members.find(m => m.id === lead.assigned_to_id)?.full_name || '—'}</td>
+                    <td style={{ padding: '8px 12px' }}><span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagement_type === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagement_type}</span></td>
+                    <td style={{ padding: '8px 12px', color: '#22d3ee', fontWeight: 700, whiteSpace: 'nowrap' }}>{formatCurrency(lead.proposal_value)}</td>
                     <td style={{ padding: '8px 12px' }}>
                       <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, background: lead.status === 'Won' ? 'rgba(16,185,129,0.15)' : lead.status === 'Lost' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.1)', color: lead.status === 'Won' ? '#10b981' : lead.status === 'Lost' ? '#ef4444' : '#f59e0b' }}>{lead.status}</span>
                     </td>
@@ -307,7 +307,7 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
                   <td style={{ padding: '10px 12px', color: 'var(--text)' }}>{formatPercent(row.viewRate)}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text)' }}>{row.totalConnects}</td>
                   <td style={{ padding: '10px 12px', color: '#22d3ee', fontWeight: 600 }}>{formatCurrency(row.pipelineValue)}</td>
-                  <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{row.monthlyTarget}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{row.monthly_target}</td>
                   <td style={{ padding: '10px 12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
@@ -341,7 +341,7 @@ export default function AdminDashboard({ leads, members, profiles }: Props) {
             <tbody>
               {profilePerf.map((row, i) => (
                 <tr key={row.profileId} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--surface-2)' }}>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text)' }}>{row.profileName}</td>
+                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text)' }}>{row.profile_name}</td>
                   <td style={{ padding: '8px 10px' }}>{row.totalBids}</td>
                   <td style={{ padding: '8px 10px', color: '#10b981', fontWeight: 600 }}>{row.wonCount}</td>
                   <td style={{ padding: '8px 10px', color: row.winRate >= 0.15 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{formatPercent(row.winRate)}</td>

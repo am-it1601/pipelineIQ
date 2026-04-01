@@ -59,9 +59,9 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
   // Apply global filter to my leads
   const dateRange = getDateRange(dashFilter.preset, dashFilter.customFrom, dashFilter.customTo);
   const filteredMyLeads = filterLeadsByDate(myLeads, dateRange.from, dateRange.to)
-    .filter((l) => !dashFilter.profileId     || l.profileUsedId === dashFilter.profileId)
-    .filter((l) => !dashFilter.engagementType || l.engagementType === dashFilter.engagementType)
-    .filter((l) => !dashFilter.leadSource     || l.leadSource === dashFilter.leadSource);
+    .filter((l) => !dashFilter.profileId     || l.profile_used_id === dashFilter.profileId)
+    .filter((l) => !dashFilter.engagement_type || l.engagement_type === dashFilter.engagement_type)
+    .filter((l) => !dashFilter.lead_source     || l.lead_source === dashFilter.lead_source);
 
   const activity = getActivityKPIs(filteredMyLeads, 1);
   const conversion = getConversionKPIs(filteredMyLeads);
@@ -74,17 +74,17 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
   const myEng = getEngagementTypeKPIs(filteredMyLeads);
   const recentLeads = [...filteredMyLeads].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
 
-  const myMember = members.find((m) => m.id === user.bdMemberId);
-  const monthlyTarget = myMember?.monthlyTarget ?? 0;
+  const myMember = members.find((m) => m.id === user.bd_member_id);
+  const monthly_target = myMember?.monthly_target ?? 0;
   // Use total (unfiltered) bids for target completion to keep it meaningful
   const totalMonthlyBids = getActivityKPIs(myLeads, 1).monthlyBids;
-  const targetCompletion = monthlyTarget > 0 ? totalMonthlyBids / monthlyTarget : 0;
+  const targetCompletion = monthly_target > 0 ? totalMonthlyBids / monthly_target : 0;
 
   // Personal avg pace — unfiltered
   const myAvgBidsRow = getAvgBidsPerDay(myLeads, myMember ? [myMember] : [])[0];
 
   // Hot leads
-  const myHotLeads = myLeads.filter((l) => l.isHot).sort((a, b) => b.date.localeCompare(a.date));
+  const myHotLeads = myLeads.filter((l) => l.is_hot).sort((a, b) => b.date.localeCompare(a.date));
 
   // Profile performance across all profiles (team-wide, read-only for BD)
   const profileMomentum = getProfileMomentum(leads, profiles);
@@ -123,12 +123,12 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
                     <td style={{ padding: '8px 12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(lead.date)}</td>
                     <td style={{ padding: '8px 12px', fontWeight: 600, color: 'var(--text)', maxWidth: 220 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.projectTitle}</span>
-                        {lead.upworkLink && <a href={lead.upworkLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', flexShrink: 0 }}><ExternalLink size={11} /></a>}
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.project_title}</span>
+                        {lead.upwork_link && <a href={lead.upwork_link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', flexShrink: 0 }}><ExternalLink size={11} /></a>}
                       </div>
                     </td>
-                    <td style={{ padding: '8px 12px' }}><span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagementType === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagementType}</span></td>
-                    <td style={{ padding: '8px 12px', color: '#22d3ee', fontWeight: 700, whiteSpace: 'nowrap' }}>{formatCurrency(lead.proposalValue)}</td>
+                    <td style={{ padding: '8px 12px' }}><span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagement_type === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagement_type}</span></td>
+                    <td style={{ padding: '8px 12px', color: '#22d3ee', fontWeight: 700, whiteSpace: 'nowrap' }}>{formatCurrency(lead.proposal_value)}</td>
                     <td style={{ padding: '8px 12px' }}><StatusBadge status={lead.status} size="sm" /></td>
                     <td style={{ padding: '8px 12px', color: 'var(--text-muted)', maxWidth: 160 }}><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{lead.remarks || '—'}</span></td>
                   </tr>
@@ -142,9 +142,9 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
       {/* Welcome Banner */}
       <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Welcome back, {user.name.split(' ')[0]} 👋</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Welcome back, {(user.full_name || "").split(' ')[0]} 👋</div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
-            You've submitted <strong style={{ color: '#818cf8' }}>{activity.monthlyBids}</strong> bids this month — target is <strong style={{ color: '#22d3ee' }}>{monthlyTarget}</strong>
+            You've submitted <strong style={{ color: '#818cf8' }}>{activity.monthlyBids}</strong> bids this month — target is <strong style={{ color: '#22d3ee' }}>{monthly_target}</strong>
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -346,7 +346,7 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
                     <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--text)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: PROFILE_COLORS[i % PROFILE_COLORS.length] }} />
-                        {row.profileName}
+                        {row.profile_name}
                       </div>
                     </td>
                     <td style={{ padding: '10px 12px' }}>{row.totalBids}</td>
@@ -394,23 +394,23 @@ export default function BDDashboard({ leads, members, profiles, user }: Props) {
                   style={{ background: isHovered ? 'rgba(99,102,241,0.08)' : i % 2 === 0 ? 'transparent' : 'var(--surface-2)', transition: 'background 0.12s', cursor: 'default' }}>
                   <td style={{ padding: '9px 10px', color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(lead.date)}</td>
                   <td style={{ padding: '9px 10px', color: 'var(--text)', fontWeight: 500, maxWidth: 220 }}>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.projectTitle}</div>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.project_title}</div>
                   </td>
                   <td style={{ padding: '9px 10px' }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--surface-2)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{lead.leadSource}</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--surface-2)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{lead.lead_source}</span>
                   </td>
                   <td style={{ padding: '9px 10px' }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagementType === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagementType === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagementType}</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.12)' : 'rgba(99,102,241,0.12)', color: lead.engagement_type === 'Hourly' ? '#22d3ee' : '#818cf8', border: `1px solid ${lead.engagement_type === 'Hourly' ? 'rgba(34,211,238,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.engagement_type}</span>
                   </td>
                   <td style={{ padding: '9px 10px', color: '#22d3ee', fontWeight: 600 }}>
-                    <div>{formatCurrency(lead.proposalValue)}</div>
-                    {lead.engagementType === 'Hourly' && lead.hourlyRate && lead.estimatedHours && (
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>${lead.hourlyRate}/hr × {lead.estimatedHours}h</div>
+                    <div>{formatCurrency(lead.proposal_value)}</div>
+                    {lead.engagement_type === 'Hourly' && lead.hourly_rate && lead.estimated_hours && (
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>${lead.hourly_rate}/hr × {lead.estimated_hours}h</div>
                     )}
                   </td>
-                  <td style={{ padding: '9px 10px', color: 'var(--text-muted)' }}>{lead.connectsUsed}</td>
+                  <td style={{ padding: '9px 10px', color: 'var(--text-muted)' }}>{lead.connects_used}</td>
                   <td style={{ padding: '9px 10px' }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.bidType === 'Boosted' ? 'rgba(245,158,11,0.15)' : 'rgba(99,102,241,0.15)', color: lead.bidType === 'Boosted' ? '#f59e0b' : '#818cf8', border: `1px solid ${lead.bidType === 'Boosted' ? 'rgba(245,158,11,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.bidType}</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: lead.bid_type === 'Boosted' ? 'rgba(245,158,11,0.15)' : 'rgba(99,102,241,0.15)', color: lead.bid_type === 'Boosted' ? '#f59e0b' : '#818cf8', border: `1px solid ${lead.bid_type === 'Boosted' ? 'rgba(245,158,11,0.3)' : 'rgba(99,102,241,0.3)'}` }}>{lead.bid_type}</span>
                   </td>
                   <td style={{ padding: '9px 10px' }}><StatusBadge status={lead.status} size="sm" /></td>
                 </tr>

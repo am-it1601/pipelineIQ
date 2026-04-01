@@ -1,6 +1,7 @@
 // For adding custom fonts with other frameworks, see:
 // https://tailwindcss.com/docs/font-family
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import SupabaseAuthProvider from "@/components/providers/SupabaseAuthProvider";
 import type { Metadata } from "next";
 import { Geist, IBM_Plex_Mono, Noto_Serif } from "next/font/google";
 import "./globals.css";
@@ -39,7 +40,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SupabaseAuthProvider>
+            {children}
+          </SupabaseAuthProvider>
         </ThemeProvider>
       </body>
     </html>

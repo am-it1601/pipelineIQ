@@ -16,15 +16,29 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [l, m, p] = await Promise.all([
-        fetch('/api/leads').then((r) => r.json()),
-        fetch('/api/members').then((r) => r.json()),
-        fetch('/api/profiles').then((r) => r.json()),
-      ]);
-      setLeads(l);
-      setMembers(m);
-      setProfiles(p);
-      setLoading(false);
+      try {
+        const [leadsRes, membersRes, profilesRes] = await Promise.all([
+          fetch('/api/leads').then((r) => r.json()),
+          fetch('/api/members').then((r) => r.json()),
+          fetch('/api/profiles').then((r) => r.json()),
+        ]);
+        
+        // API returns { data: [], pagination: {} } or just []
+        const leadsData = leadsRes.data || leadsRes;
+        const membersData = membersRes.data || (Array.isArray(membersRes) ? membersRes : []);
+        const profilesData = profilesRes.data || (Array.isArray(profilesRes) ? profilesRes : []);
+        
+        setLeads(Array.isArray(leadsData) ? leadsData : []);
+        setMembers(Array.isArray(membersData) ? membersData : []);
+        setProfiles(Array.isArray(profilesData) ? profilesData : []);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        setLeads([]);
+        setMembers([]);
+        setProfiles([]);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [currentUser]);

@@ -15,7 +15,7 @@ import {
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 
@@ -103,3 +103,9 @@ export function getDateRange(preset: DatePreset, customFrom?: string, customTo?:
 export function filterLeadsByDate<T extends { date: string }>(leads: T[], from: string, to: string): T[] {
   return leads.filter((l) => l.date >= from && l.date <= to);
 }
+
+
+export const handleError = (error: unknown) => {
+  console.error(error);
+  throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+};

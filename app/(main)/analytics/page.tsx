@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={profilePerf} barGap={2}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="profileName" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="profile_name" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
             <Tooltip content={customTooltip} />
             <Legend wrapperStyle={{ fontSize: 12 }} />

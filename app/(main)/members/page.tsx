@@ -8,12 +8,13 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { Plus, Pencil, Check, X, Power } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
-const empty = (): Omit<BDMember, 'id'> => ({
-  name: '',
+const empty = (): Partial<Omit<BDMember, 'id'>> => ({
+  full_name: '',
+  email: '',
   status: 'active',
-  monthlyTarget: 50,
-  incentiveEligible: true,
-  joinDate: new Date().toISOString().split('T')[0],
+  monthly_target: 50,
+  incentive_eligible: true,
+  join_date: new Date().toISOString().split('T')[0],
 });
 
 export default function MembersPage() {
@@ -47,7 +48,7 @@ export default function MembersPage() {
   };
 
   const saveNew = async () => {
-    if (!newForm.name.trim()) return;
+    if (!newForm.full_name?.trim()) return;
     const res = await fetch('/api/members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newForm) });
     if (res.ok) { const created = await res.json(); setMembers((p) => [...p, created]); setAdding(false); setNewForm(empty()); }
   };
@@ -72,7 +73,7 @@ export default function MembersPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--surface-2)' }}>
-              {['Name', 'Status', 'Monthly Target', 'Incentive Eligible', 'Join Date', 'Actions'].map(h => (
+              {['Name', 'Email', 'Status', 'Monthly Target', 'Incentive Eligible', 'Join Date', 'Actions'].map(h => (
                 <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>{h}</th>
               ))}
             </tr>
@@ -81,11 +82,12 @@ export default function MembersPage() {
             {/* New member row */}
             {adding && (
               <tr style={{ background: 'rgba(99,102,241,0.07)' }}>
-                <td style={{ padding: '8px 14px' }}><input autoFocus placeholder="Full Name" value={newForm.name} onChange={(e) => setNewForm((f) => ({ ...f, name: e.target.value }))} style={inputStyle} onKeyDown={(e) => { if (e.key === 'Enter') saveNew(); }} /></td>
+                <td style={{ padding: '8px 14px' }}><input autoFocus placeholder="Full Name" value={newForm.full_name} onChange={(e) => setNewForm((f) => ({ ...f, name: e.target.value }))} style={inputStyle} onKeyDown={(e) => { if (e.key === 'Enter') saveNew(); }} /></td>
+                <td style={{ padding: '8px 14px' }}><input type="email" placeholder="Email Address" value={newForm.email} onChange={(e) => setNewForm((f) => ({ ...f, email: e.target.value }))} style={inputStyle} onKeyDown={(e) => { if (e.key === 'Enter') saveNew(); }} /></td>
                 <td style={{ padding: '8px 14px' }}><select value={newForm.status} onChange={(e) => setNewForm((f) => ({ ...f, status: e.target.value as 'active' | 'inactive' }))} style={inputStyle}><option>active</option><option>inactive</option></select></td>
-                <td style={{ padding: '8px 14px' }}><input type="number" value={newForm.monthlyTarget} onChange={(e) => setNewForm((f) => ({ ...f, monthlyTarget: Number(e.target.value) }))} style={inputStyle} /></td>
-                <td style={{ padding: '8px 14px' }}><select value={newForm.incentiveEligible ? 'yes' : 'no'} onChange={(e) => setNewForm((f) => ({ ...f, incentiveEligible: e.target.value === 'yes' }))} style={inputStyle}><option value="yes">Yes</option><option value="no">No</option></select></td>
-                <td style={{ padding: '8px 14px' }}><input type="date" value={newForm.joinDate} onChange={(e) => setNewForm((f) => ({ ...f, joinDate: e.target.value }))} style={inputStyle} /></td>
+                <td style={{ padding: '8px 14px' }}><input type="number" value={newForm.monthly_target || ""} onChange={(e) => setNewForm((f) => ({ ...f, monthly_target: Number(e.target.value) }))} style={inputStyle} /></td>
+                <td style={{ padding: '8px 14px' }}><select value={newForm.incentive_eligible ? 'yes' : 'no'} onChange={(e) => setNewForm((f) => ({ ...f, incentive_eligible: e.target.value === 'yes' }))} style={inputStyle}><option value="yes">Yes</option><option value="no">No</option></select></td>
+                <td style={{ padding: '8px 14px' }}><input type="date" value={newForm.join_date || ""} onChange={(e) => setNewForm((f) => ({ ...f, join_date: e.target.value }))} style={inputStyle} /></td>
                 <td style={{ padding: '8px 14px' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button onClick={saveNew} style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: '#10b981', color: '#fff', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={12} />Save</button>
@@ -100,7 +102,10 @@ export default function MembersPage() {
               return (
                 <tr key={m.id} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
                   <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text)' }}>
-                    {isEditing ? <input value={draft.name ?? m.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} style={inputStyle} autoFocus /> : m.name}
+                    {isEditing ? <input value={draft.full_name ?? m.full_name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} style={inputStyle} autoFocus /> : m.full_name}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>
+                    {m.email}
                   </td>
                   <td style={{ padding: '10px 14px' }}>
                     <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: m.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: m.status === 'active' ? '#10b981' : '#ef4444', border: `1px solid ${m.status === 'active' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
@@ -108,14 +113,14 @@ export default function MembersPage() {
                     </span>
                   </td>
                   <td style={{ padding: '10px 14px', color: 'var(--text)' }}>
-                    {isEditing ? <input type="number" value={draft.monthlyTarget ?? m.monthlyTarget} onChange={(e) => setDraft((d) => ({ ...d, monthlyTarget: Number(e.target.value) }))} style={{ ...inputStyle, width: 70 }} /> : m.monthlyTarget}
+                    {isEditing ? <input type="number" value={draft.monthly_target ?? (m.monthly_target || "")} onChange={(e) => setDraft((d) => ({ ...d, monthly_target: Number(e.target.value) }))} style={{ ...inputStyle, width: 70 }} /> : m.monthly_target}
                   </td>
                   <td style={{ padding: '10px 14px' }}>
-                    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: m.incentiveEligible ? 'rgba(99,102,241,0.15)' : 'var(--surface-2)', color: m.incentiveEligible ? '#818cf8' : 'var(--text-muted)' }}>
-                      {m.incentiveEligible ? 'Yes' : 'No'}
+                    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: m.incentive_eligible ? 'rgba(99,102,241,0.15)' : 'var(--surface-2)', color: m.incentive_eligible ? '#818cf8' : 'var(--text-muted)' }}>
+                      {m.incentive_eligible ? 'Yes' : 'No'}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(m.joinDate)}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(m.join_date || "")}</td>
                   <td style={{ padding: '10px 14px' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', gap: 6 }}>

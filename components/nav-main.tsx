@@ -23,7 +23,7 @@ export function NavMain({
 }: {
   items: {
     title: string
-    url: string
+    url?: string
     icon: React.ReactNode
     isActive?: boolean
     items?: {
@@ -34,7 +34,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Maverics Dashboard</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

@@ -35,11 +35,11 @@ import { subWeeks, subMonths, format, addWeeks, addMonths, parseISO } from 'date
 /**
  * Returns leads visible to the given user.
  * - Admins see all leads.
- * - BD users see only their own (matched via bdMemberId).
+ * - BD users see only their own (matched via bd_member_id).
  */
 export function getScopedLeads(leads: LeadLogEntry[], user: User): LeadLogEntry[] {
   if (user.role === 'admin') return leads;
-  return leads.filter((l) => l.assignedToId === user.bdMemberId);
+  return leads.filter((l) => l.assigned_to_id === user.bd_member_id);
 }
 
 // ─── Active leads helper ──────────────────────────────────────────────────────
@@ -61,7 +61,7 @@ export function getActivityKPIs(
 
   const weeklyBids = leads.filter((l) => getWeekKey(l.date) === currentWeek).length;
   const monthlyBids = leads.filter((l) => getMonthKey(l.date) === currentMonth).length;
-  const totalConnectsUsed = leads.reduce((sum, l) => sum + l.connectsUsed, 0);
+  const totalConnectsUsed = leads.reduce((sum, l) => sum + l.connects_used, 0);
 
   void now; // suppress unused warning
 
@@ -122,13 +122,13 @@ export function getConversionKPIs(leads: LeadLogEntry[]): ConversionKPIs {
 // ─── Cost / Efficiency KPIs ───────────────────────────────────────────────────
 
 export function getCostKPIs(leads: LeadLogEntry[]): CostKPIs {
-  const totalConnects = leads.reduce((sum, l) => sum + l.connectsUsed, 0);
+  const totalConnects = leads.reduce((sum, l) => sum + l.connects_used, 0);
   const wonLeads = leads.filter((l) => l.status === 'Won');
-  const wonConnects = wonLeads.reduce((sum, l) => sum + l.connectsUsed, 0);
-  const wonValue = wonLeads.reduce((sum, l) => sum + l.proposalValue, 0);
+  const wonConnects = wonLeads.reduce((sum, l) => sum + l.connects_used, 0);
+  const wonValue = wonLeads.reduce((sum, l) => sum + l.proposal_value, 0);
 
-  const boosted = leads.filter((l) => l.bidType === 'Boosted');
-  const normal = leads.filter((l) => l.bidType === 'Normal');
+  const boosted = leads.filter((l) => l.bid_type === 'Boosted');
+  const normal = leads.filter((l) => l.bid_type === 'Normal');
   const boostedWon = boosted.filter((l) => l.status === 'Won').length;
   const normalWon = normal.filter((l) => l.status === 'Won').length;
 
@@ -148,8 +148,8 @@ export function getCostKPIs(leads: LeadLogEntry[]): CostKPIs {
 export function getPipelineKPIs(leads: LeadLogEntry[]): PipelineKPIs {
   const activeLeads = leads.filter(isActive);
   const wonLeads = leads.filter((l) => l.status === 'Won');
-  const pipelineValue = activeLeads.reduce((sum, l) => sum + l.proposalValue, 0);
-  const wonValue = wonLeads.reduce((sum, l) => sum + l.proposalValue, 0);
+  const pipelineValue = activeLeads.reduce((sum, l) => sum + l.proposal_value, 0);
+  const wonValue = wonLeads.reduce((sum, l) => sum + l.proposal_value, 0);
   const winRate = leads.length > 0 ? wonLeads.length / leads.length : 0;
 
   return {
@@ -174,7 +174,7 @@ export function getWeeklyMetrics(leads: LeadLogEntry[], weeksBack = 8): WeeklyMe
       weekStart,
       bids: weekLeads.length,
       wins: weekLeads.filter((l) => l.status === 'Won').length,
-      connectsUsed: weekLeads.reduce((s, l) => s + l.connectsUsed, 0),
+      connects_used: weekLeads.reduce((s, l) => s + l.connects_used, 0),
       viewedCount: weekLeads.filter(
         (l) => l.status === 'Viewed' || l.status === 'Discussion' || l.status === 'Won'
       ).length,
@@ -198,8 +198,8 @@ export function getMonthlyMetrics(leads: LeadLogEntry[], monthsBack = 6): Monthl
       month,
       bids: monthLeads.length,
       wins: monthLeads.filter((l) => l.status === 'Won').length,
-      connectsUsed: monthLeads.reduce((s, l) => s + l.connectsUsed, 0),
-      pipelineValue: activeLeads.reduce((s, l) => s + l.proposalValue, 0),
+      connects_used: monthLeads.reduce((s, l) => s + l.connects_used, 0),
+      pipelineValue: activeLeads.reduce((s, l) => s + l.proposal_value, 0),
     });
   }
   return months;
@@ -238,7 +238,7 @@ export function getBDPerformance(
   const currentMonth = getCurrentMonthKey();
 
   return members.map((member) => {
-    const memberLeads = leads.filter((l) => l.assignedToId === member.id);
+    const memberLeads = leads.filter((l) => l.assigned_to_id === member.id);
     const monthlyLeads = memberLeads.filter((l) => getMonthKey(l.date) === currentMonth);
     const wonLeads = memberLeads.filter((l) => l.status === 'Won');
     const viewedLeads = memberLeads.filter(
@@ -248,16 +248,16 @@ export function getBDPerformance(
 
     return {
       memberId: member.id,
-      memberName: member.name,
+      memberName: member.full_name,
       totalBids: memberLeads.length,
       wonCount: wonLeads.length,
       winRate: memberLeads.length > 0 ? wonLeads.length / memberLeads.length : 0,
       viewRate: memberLeads.length > 0 ? viewedLeads.length / memberLeads.length : 0,
-      totalConnects: memberLeads.reduce((s, l) => s + l.connectsUsed, 0),
-      pipelineValue: activeLeads.reduce((s, l) => s + l.proposalValue, 0),
-      monthlyTarget: member.monthlyTarget,
+      totalConnects: memberLeads.reduce((s, l) => s + l.connects_used, 0),
+      pipelineValue: activeLeads.reduce((s, l) => s + l.proposal_value, 0),
+      monthly_target: member.monthly_target || 0,
       targetCompletion:
-        member.monthlyTarget > 0 ? monthlyLeads.length / member.monthlyTarget : 0,
+        (member.monthly_target || 0) > 0 ? monthlyLeads.length / (member.monthly_target || 1) : 0,
     };
   });
 }
@@ -269,22 +269,22 @@ export function getProfilePerformance(
   profiles: UpworkProfile[]
 ): ProfilePerformanceRow[] {
   return profiles.map((profile) => {
-    const profileLeads = leads.filter((l) => l.profileUsedId === profile.id);
+    const profileLeads = leads.filter((l) => l.profile_used_id === profile.id);
     const wonLeads = profileLeads.filter((l) => l.status === 'Won');
-    const boostedLeads = profileLeads.filter((l) => l.bidType === 'Boosted');
-    const normalLeads = profileLeads.filter((l) => l.bidType === 'Normal');
+    const boostedLeads = profileLeads.filter((l) => l.bid_type === 'Boosted');
+    const normalLeads = profileLeads.filter((l) => l.bid_type === 'Normal');
     const activeLeads = profileLeads.filter(isActive);
 
     return {
       profileId: profile.id,
-      profileName: profile.profileName,
+      profile_name: profile.profile_name,
       totalBids: profileLeads.length,
       wonCount: wonLeads.length,
       winRate: profileLeads.length > 0 ? wonLeads.length / profileLeads.length : 0,
-      totalConnects: profileLeads.reduce((s, l) => s + l.connectsUsed, 0),
+      totalConnects: profileLeads.reduce((s, l) => s + l.connects_used, 0),
       boostedBids: boostedLeads.length,
       normalBids: normalLeads.length,
-      pipelineValue: activeLeads.reduce((s, l) => s + l.proposalValue, 0),
+      pipelineValue: activeLeads.reduce((s, l) => s + l.proposal_value, 0),
     };
   });
 }
@@ -294,7 +294,7 @@ export function getProfilePerformance(
 export function getSourceBreakdown(leads: LeadLogEntry[]) {
   const sources = ['Upwork', 'Referral', 'LinkedIn', 'Direct'] as const;
   return sources.map((source) => {
-    const sourceLeads = leads.filter((l) => l.leadSource === source);
+    const sourceLeads = leads.filter((l) => l.lead_source === source);
     const won = sourceLeads.filter((l) => l.status === 'Won').length;
     return {
       source,
@@ -369,7 +369,7 @@ export function getAvgBidsPerDay(
   const last30 = format(subWeeks(new Date(), 4), 'yyyy-MM-dd');
 
   return members.map((member) => {
-    const memberLeads = leads.filter((l) => l.assignedToId === member.id);
+    const memberLeads = leads.filter((l) => l.assigned_to_id === member.id);
 
     // compute distinct days the member logged at least one bid
     const distinctDays = new Set(memberLeads.map((l) => l.date));
@@ -380,7 +380,7 @@ export function getAvgBidsPerDay(
 
     return {
       memberId: member.id,
-      memberName: member.name,
+      memberName: member.full_name,
       totalBids: memberLeads.length,
       activeDays,
       avgBidsPerDay: activeDays > 0 ? memberLeads.length / activeDays : 0,
@@ -414,10 +414,10 @@ export function getWeeklyBDComparison(
     };
     for (const member of members) {
       const count = leads.filter(
-        (l) => l.assignedToId === member.id && l.date >= weekStart && l.date < weekEnd
+        (l) => l.assigned_to_id === member.id && l.date >= weekStart && l.date < weekEnd
       ).length;
       // use first name for shorter chart labels
-      entry[member.name.split(' ')[0]] = count;
+      entry[member.full_name.split(' ')[0]] = count;
     }
     weeks.push(entry);
   }
@@ -444,10 +444,10 @@ export function getProfileMomentum(
   const last4Weeks = format(subWeeks(new Date(), 4), 'yyyy-MM-dd');
 
   return profiles.map((profile) => {
-    const profileLeads = leads.filter((l) => l.profileUsedId === profile.id);
+    const profileLeads = leads.filter((l) => l.profile_used_id === profile.id);
     const wonLeads = profileLeads.filter((l) => l.status === 'Won');
-    const boostedLeads = profileLeads.filter((l) => l.bidType === 'Boosted');
-    const normalLeads = profileLeads.filter((l) => l.bidType === 'Normal');
+    const boostedLeads = profileLeads.filter((l) => l.bid_type === 'Boosted');
+    const normalLeads = profileLeads.filter((l) => l.bid_type === 'Normal');
     const activeLeads = profileLeads.filter(isActive);
 
     const overallWinRate = profileLeads.length > 0 ? wonLeads.length / profileLeads.length : 0;
@@ -459,19 +459,19 @@ export function getProfileMomentum(
 
     const avgProposalValue =
       profileLeads.length > 0
-        ? profileLeads.reduce((s, l) => s + l.proposalValue, 0) / profileLeads.length
+        ? profileLeads.reduce((s, l) => s + l.proposal_value, 0) / profileLeads.length
         : 0;
 
     return {
       profileId: profile.id,
-      profileName: profile.profileName,
+      profile_name: profile.profile_name,
       totalBids: profileLeads.length,
       wonCount: wonLeads.length,
       winRate: overallWinRate,
-      totalConnects: profileLeads.reduce((s, l) => s + l.connectsUsed, 0),
+      totalConnects: profileLeads.reduce((s, l) => s + l.connects_used, 0),
       boostedBids: boostedLeads.length,
       normalBids: normalLeads.length,
-      pipelineValue: activeLeads.reduce((s, l) => s + l.proposalValue, 0),
+      pipelineValue: activeLeads.reduce((s, l) => s + l.proposal_value, 0),
       recentWinRate,
       momentumDelta: recentWinRate - overallWinRate,
       avgProposalValue,
@@ -499,27 +499,27 @@ export interface EngagementTypeKPIs {
 }
 
 export function getEngagementTypeKPIs(leads: LeadLogEntry[]): EngagementTypeKPIs {
-  const fixed  = leads.filter((l) => l.engagementType === 'Fixed');
-  const hourly = leads.filter((l) => l.engagementType === 'Hourly');
+  const fixed  = leads.filter((l) => l.engagement_type === 'Fixed');
+  const hourly = leads.filter((l) => l.engagement_type === 'Hourly');
   const total  = leads.length || 1;
 
   const winRate = (arr: LeadLogEntry[]) =>
     arr.length > 0 ? arr.filter((l) => l.status === 'Won').length / arr.length : 0;
 
   const avgVal = (arr: LeadLogEntry[]) =>
-    arr.length > 0 ? arr.reduce((s, l) => s + l.proposalValue, 0) / arr.length : 0;
+    arr.length > 0 ? arr.reduce((s, l) => s + l.proposal_value, 0) / arr.length : 0;
 
   const activeHourly = hourly.filter(isActive);
   const activeFixed  = fixed.filter(isActive);
 
   const avgHourlyRate =
     hourly.length > 0
-      ? hourly.reduce((s, l) => s + (l.hourlyRate ?? 0), 0) / hourly.length
+      ? hourly.reduce((s, l) => s + (l.hourly_rate ?? 0), 0) / hourly.length
       : 0;
 
   const avgEstimatedHours =
     hourly.length > 0
-      ? hourly.reduce((s, l) => s + (l.estimatedHours ?? 0), 0) / hourly.length
+      ? hourly.reduce((s, l) => s + (l.estimated_hours ?? 0), 0) / hourly.length
       : 0;
 
   return {
@@ -533,8 +533,8 @@ export function getEngagementTypeKPIs(leads: LeadLogEntry[]): EngagementTypeKPIs
     avgHourlyValue: avgVal(hourly),
     avgHourlyRate,
     avgEstimatedHours,
-    totalHourlyHours: activeHourly.reduce((s, l) => s + (l.estimatedHours ?? 0), 0),
-    fixedPipelineValue:  activeFixed.reduce((s, l) => s + l.proposalValue, 0),
-    hourlyPipelineValue: activeHourly.reduce((s, l) => s + l.proposalValue, 0),
+    totalHourlyHours: activeHourly.reduce((s, l) => s + (l.estimated_hours ?? 0), 0),
+    fixedPipelineValue:  activeFixed.reduce((s, l) => s + l.proposal_value, 0),
+    hourlyPipelineValue: activeHourly.reduce((s, l) => s + l.proposal_value, 0),
   };
 }

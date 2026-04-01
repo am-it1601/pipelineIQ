@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { Plus, Pencil, Check, X, Power } from 'lucide-react';
 
-const empty = (): Omit<UpworkProfile, 'id'> => ({ profileName: '', status: 'active', focusArea: '' });
+const empty = (): Omit<UpworkProfile, 'id'> => ({ profile_name: '', profile_link: '', status: 'active', focus_area: '', skill_tags: '' } as Omit<UpworkProfile, 'id'>);
 
 export default function ProfilesPage() {
   const user = useAuthStore((s) => s.currentUser);
@@ -40,7 +40,7 @@ export default function ProfilesPage() {
   };
 
   const saveNew = async () => {
-    if (!newForm.profileName.trim()) return;
+    if (!newForm.profile_name.trim()) return;
     const res = await fetch('/api/profiles', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newForm) });
     if (res.ok) { const created = await res.json(); setProfiles((prev) => [...prev, created]); setAdding(false); setNewForm(empty()); }
   };
@@ -65,7 +65,7 @@ export default function ProfilesPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--surface-2)' }}>
-              {['Profile Name', 'Status', 'Focus Area', 'Actions'].map(h => (
+              {['Profile Name', 'Profile Link', 'Status', 'Focus Area', 'Skill Tags', 'Actions'].map(h => (
                 <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>{h}</th>
               ))}
             </tr>
@@ -73,9 +73,11 @@ export default function ProfilesPage() {
           <tbody>
             {adding && (
               <tr style={{ background: 'rgba(99,102,241,0.07)' }}>
-                <td style={{ padding: '8px 14px' }}><input autoFocus placeholder="Profile Name" value={newForm.profileName} onChange={(e) => setNewForm(f => ({ ...f, profileName: e.target.value }))} style={inputStyle} onKeyDown={(e) => { if (e.key === 'Enter') saveNew(); }} /></td>
+                <td style={{ padding: '8px 14px' }}><input autoFocus placeholder="Profile Name" value={newForm.profile_name} onChange={(e) => setNewForm(f => ({ ...f, profile_name: e.target.value }))} style={inputStyle} onKeyDown={(e) => { if (e.key === 'Enter') saveNew(); }} /></td>
+                <td style={{ padding: '8px 14px' }}><input placeholder="Upwork Link" value={newForm.profile_link || ''} onChange={(e) => setNewForm(f => ({ ...f, profile_link: e.target.value }))} style={inputStyle} /></td>
                 <td style={{ padding: '8px 14px' }}><select value={newForm.status} onChange={(e) => setNewForm(f => ({ ...f, status: e.target.value as 'active' | 'inactive' }))} style={inputStyle}><option>active</option><option>inactive</option></select></td>
-                <td style={{ padding: '8px 14px' }}><input placeholder="e.g. Full-Stack Development" value={newForm.focusArea} onChange={(e) => setNewForm(f => ({ ...f, focusArea: e.target.value }))} style={inputStyle} /></td>
+                <td style={{ padding: '8px 14px' }}><input placeholder="e.g. Full-Stack Development" value={newForm.focus_area || ""} onChange={(e) => setNewForm(f => ({ ...f, focus_area: e.target.value }))} style={inputStyle} /></td>
+                <td style={{ padding: '8px 14px' }}><input placeholder="React, Node.js" value={newForm.skill_tags || ''} onChange={(e) => setNewForm(f => ({ ...f, skill_tags: e.target.value }))} style={inputStyle} /></td>
                 <td style={{ padding: '8px 14px' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button onClick={saveNew} style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: '#10b981', color: '#fff', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={12} />Save</button>
@@ -90,13 +92,19 @@ export default function ProfilesPage() {
               return (
                 <tr key={p.id} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
                   <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text)' }}>
-                    {isEditing ? <input value={draft.profileName ?? p.profileName} onChange={(e) => setDraft(d => ({ ...d, profileName: e.target.value }))} style={inputStyle} autoFocus /> : p.profileName}
+                    {isEditing ? <input value={draft.profile_name ?? p.profile_name} onChange={(e) => setDraft(d => ({ ...d, profile_name: e.target.value }))} style={inputStyle} autoFocus /> : p.profile_name}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text)' }}>
+                    {isEditing ? <input value={(draft.profile_link ?? p.profile_link) || ''} onChange={(e) => setDraft(d => ({ ...d, profile_link: e.target.value }))} style={inputStyle} /> : (p.profile_link ? <a href={p.profile_link} target="_blank" rel="noreferrer" style={{color: '#6366f1', textDecoration: 'none'}}>View</a> : '-')}
                   </td>
                   <td style={{ padding: '10px 14px' }}>
                     <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: p.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: p.status === 'active' ? '#10b981' : '#ef4444', border: `1px solid ${p.status === 'active' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}` }}>{p.status}</span>
                   </td>
                   <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>
-                    {isEditing ? <input value={draft.focusArea ?? p.focusArea} onChange={(e) => setDraft(d => ({ ...d, focusArea: e.target.value }))} style={inputStyle} /> : p.focusArea}
+                    {isEditing ? <input value={draft.focus_area ?? p.focus_area ?? ""} onChange={(e) => setDraft(d => ({ ...d, focus_area: e.target.value }))} style={inputStyle} /> : p.focus_area}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>
+                    {isEditing ? <input value={(draft.skill_tags ?? p.skill_tags) || ''} onChange={(e) => setDraft(d => ({ ...d, skill_tags: e.target.value }))} style={inputStyle} /> : p.skill_tags || '-'}
                   </td>
                   <td style={{ padding: '10px 14px' }}>
                     {isEditing ? (

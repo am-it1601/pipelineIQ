@@ -22,8 +22,8 @@ export interface DashboardFilters {
   customFrom: string;
   customTo: string;
   profileId: string;           // '' = all
-  engagementType: EngagementFilter;
-  leadSource: LeadSourceFilter;
+  engagement_type: EngagementFilter;
+  lead_source: LeadSourceFilter;
 }
 
 const DEFAULT: DashboardFilters = {
@@ -31,8 +31,8 @@ const DEFAULT: DashboardFilters = {
   customFrom: '',
   customTo: '',
   profileId: '',
-  engagementType: '',
-  leadSource: '',
+  engagement_type: '',
+  lead_source: '',
 };
 
 interface Props {
@@ -47,8 +47,8 @@ export default function DashboardFilter({ profiles, value, onChange }: Props) {
   const activeCount = [
     value.preset !== 'this_month',
     !!value.profileId,
-    !!value.engagementType,
-    !!value.leadSource,
+    !!value.engagement_type,
+    !!value.lead_source,
   ].filter(Boolean).length;
 
   const selStyle: React.CSSProperties = {
@@ -121,18 +121,18 @@ export default function DashboardFilter({ profiles, value, onChange }: Props) {
         {/* Profile */}
         <select value={value.profileId} onChange={(e) => patch({ profileId: e.target.value })} style={selStyle}>
           <option value="">All Profiles</option>
-          {profiles.map((p) => <option key={p.id} value={p.id}>{p.profileName}</option>)}
+          {profiles.map((p) => <option key={p.id} value={p.id}>{p.profile_name}</option>)}
         </select>
 
         {/* Engagement Type */}
-        <select value={value.engagementType} onChange={(e) => patch({ engagementType: e.target.value as EngagementFilter })} style={selStyle}>
+        <select value={value.engagement_type} onChange={(e) => patch({ engagement_type: e.target.value as EngagementFilter })} style={selStyle}>
           <option value="">All Engagements</option>
           <option value="Fixed">Fixed Price</option>
           <option value="Hourly">Hourly</option>
         </select>
 
         {/* Lead Source */}
-        <select value={value.leadSource} onChange={(e) => patch({ leadSource: e.target.value as LeadSourceFilter })} style={selStyle}>
+        <select value={value.lead_source} onChange={(e) => patch({ lead_source: e.target.value as LeadSourceFilter })} style={selStyle}>
           <option value="">All Sources</option>
           <option value="Upwork">Upwork</option>
           <option value="Referral">Referral</option>

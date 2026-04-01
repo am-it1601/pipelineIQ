@@ -9,11 +9,12 @@ import {
 import {
   SidebarTrigger
 } from "@/components/ui/sidebar";
+import { createClient } from '@/lib/supabase/client';
 import { cn } from "@/lib/utils";
 import { useAuthStore } from '@/store/authStore';
 import { Bell, LogOut, Moon, Sun } from 'lucide-react';
 import { useTheme } from "next-themes";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 
@@ -27,6 +28,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function Topbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const currentUser = useAuthStore((s) => s.currentUser);
   const logout = useAuthStore((s) => s.logout);
   const { setTheme } = useTheme()
@@ -35,7 +37,7 @@ export default function Topbar() {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2">
+    <header className="sticky top-0 z-auto bg-sidebar flex h-16 shrink-0 items-center justify-between gap-2 shadow-md">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -57,12 +59,14 @@ export default function Topbar() {
 
         {/* Theme toggle */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="outline" size="icon" />
+            }
+          >
+            <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            <span className="sr-only">Toggle theme</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setTheme("light")}>
@@ -89,14 +93,20 @@ export default function Topbar() {
             cn(currentUser?.role === 'admin' ? 'bg-primary' : 'bg-accent', 'w-8 h-8 flex items-center justify-center text-xs font-bold text-white rounded-full')
           }
         >
-          {currentUser?.avatarInitials}
+          {currentUser?.avatar_initials}
         </div>
 
         {/* Logout Button */}
         <Button
           variant='outline'
           size='icon'
-          onClick={() => { logout(); }}
+          onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            logout();
+            router.push('/login');
+            router.refresh();
+          }}
           title="Log out"
           className="
           w-8 border border-destructive ml-1 transition-all cursor-pointer 

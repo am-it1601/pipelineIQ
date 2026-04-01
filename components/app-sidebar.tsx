@@ -1,10 +1,10 @@
 "use client"
 
+import { useAuthStore } from "@/store/authStore"
 import * as React from "react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -15,159 +15,92 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, LifeBuoyIcon, SendIcon, FrameIcon, PieChartIcon, MapIcon, TerminalIcon } from "lucide-react"
+import {
+  ChartPieIcon,
+  FlagIcon,
+  FunnelIcon,
+  LayoutDashboardIcon,
+  Table2Icon,
+  TagIcon,
+  TerminalIcon,
+  Users2Icon
+} from "lucide-react"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Dashboard",
+      url: "/dashboard",
       icon: (
-        <TerminalSquareIcon
+        <LayoutDashboardIcon
         />
       ),
       isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "Leads",
       icon: (
-        <BotIcon
+        <FunnelIcon
         />
       ),
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Hot Leads",
+          url: "/leads",
+          icon: (<Table2Icon />)
         },
+
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Leads Log Entry",
+          url: "/leads",
+          icon: (<Table2Icon />)
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
+      title: "Team Roaster",
+      url: "/members",
       icon: (
-        <BookOpenIcon
-        />
-      ),
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+        <Users2Icon />
+      )
     },
     {
-      title: "Settings",
-      url: "#",
+      title: "Upwork Profiles",
+      url: "/profiles",
       icon: (
-        <Settings2Icon
+        <TagIcon
         />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: (
-        <LifeBuoyIcon
-        />
-      ),
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: (
-        <SendIcon
-        />
-      ),
+      )
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
+      name: "Sales Pipeline Analytics",
+      url: "/analytics",
       icon: (
-        <FrameIcon
+        <ChartPieIcon
         />
       ),
     },
     {
-      name: "Sales & Marketing",
+      name: "Reports",
       url: "#",
       icon: (
-        <PieChartIcon
-        />
-      ),
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: (
-        <MapIcon
+        <FlagIcon
         />
       ),
     },
   ],
 }
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const currentUser = useAuthStore((s) => s.currentUser);
+
+  const user = {
+    name: currentUser?.full_name ?? 'Guest',
+    email: currentUser?.email ?? '',
+    avatar: '',
+  };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -178,8 +111,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <TerminalIcon className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Acme Inc</span>
-                <span className="truncate text-xs">Enterprise</span>
+                <span className="truncate font-medium">Maverics IT</span>
+                <span className="truncate text-xs">BD Dashboard</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -188,10 +121,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

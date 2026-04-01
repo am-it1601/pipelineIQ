@@ -15,7 +15,7 @@ const BID_TYPES: BidType[]         = ['Normal', 'Boosted'];
 const ENGAGEMENT_TYPES: EngagementType[] = ['Fixed', 'Hourly'];
 const STATUSES: LeadStatus[] = ['Submitted', 'Viewed', 'Discussion', 'Follow Up', 'Waiting Client', 'Won', 'Lost'];
 
-type FormData = Omit<LeadLogEntry, 'id' | 'createdAt' | 'updatedAt'>;
+type FormData = Omit<LeadLogEntry, 'id' | 'created_at' | 'updated_at'>;
 
 interface Props {
   user: User;
@@ -28,21 +28,21 @@ interface Props {
 function empty(user: User): FormData {
   return {
     date: format(new Date(), 'yyyy-MM-dd'),
-    projectTitle: '',
-    leadSource: 'Upwork',
-    upworkLink: '',
-    profileUsedId: '',
-    assignedToId: user.bdMemberId ?? user.id,
-    engagementType: 'Fixed',
-    proposalValue: 0,
-    hourlyRate: undefined,
-    estimatedHours: undefined,
-    connectsUsed: 6,
-    bidType: 'Normal',
+    project_title: '',
+    lead_source: 'Upwork',
+    upwork_link: '',
+    profile_used_id: '',
+    assigned_to_id: user.bd_member_id ?? user.id,
+    engagement_type: 'Fixed',
+    proposal_value: 0,
+    hourly_rate: undefined,
+    estimated_hours: undefined,
+    connects_used: 6,
+    bid_type: 'Normal',
     status: 'Submitted',
     remarks: '',
-    createdByUserId: user.id,
-    updatedByUserId: user.id,
+    created_by_user_id: user.id,
+    updated_by_user_id: user.id,
   };
 }
 
@@ -64,9 +64,9 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
   const patch = (field: keyof FormData, val: string | number | undefined) => {
     setForm((f) => {
       const next = { ...f, [field]: val };
-      // Auto-compute proposalValue for hourly bids whenever rate or hours change
-      if ((field === 'hourlyRate' || field === 'estimatedHours') && next.engagementType === 'Hourly') {
-        next.proposalValue = (next.hourlyRate ?? 0) * (next.estimatedHours ?? 0);
+      // Auto-compute proposal_value for hourly bids whenever rate or hours change
+      if ((field === 'hourly_rate' || field === 'estimated_hours') && next.engagement_type === 'Hourly') {
+        next.proposal_value = (next.hourly_rate ?? 0) * (next.estimated_hours ?? 0);
       }
       return next;
     });
@@ -75,23 +75,23 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
   const patchEngagement = (et: EngagementType) => {
     setForm((f) => ({
       ...f,
-      engagementType: et,
+      engagement_type: et,
       // Reset hourly fields when switching to Fixed
-      hourlyRate: et === 'Fixed' ? undefined : f.hourlyRate,
-      estimatedHours: et === 'Fixed' ? undefined : f.estimatedHours,
-      proposalValue: et === 'Fixed' ? f.proposalValue : (f.hourlyRate ?? 0) * (f.estimatedHours ?? 0),
+      hourly_rate: et === 'Fixed' ? undefined : f.hourly_rate,
+      estimated_hours: et === 'Fixed' ? undefined : f.estimated_hours,
+      proposal_value: et === 'Fixed' ? f.proposal_value : (f.hourly_rate ?? 0) * (f.estimated_hours ?? 0),
     }));
   };
 
   const handleSave = async (andNew: boolean) => {
-    if (!form.projectTitle.trim()) { titleRef.current?.focus(); return; }
-    if (form.engagementType === 'Hourly' && (!form.hourlyRate || !form.estimatedHours)) return;
+    if (!form.project_title.trim()) { titleRef.current?.focus(); return; }
+    if (form.engagement_type === 'Hourly' && (!form.hourly_rate || !form.estimated_hours)) return;
     setSaving(true);
     try {
       await onAdd(form);
       setAdded((n) => n + 1);
       if (andNew) {
-        setForm({ ...empty(user), assignedToId: form.assignedToId, leadSource: form.leadSource, bidType: form.bidType, engagementType: form.engagementType });
+        setForm({ ...empty(user), assigned_to_id: form.assigned_to_id, lead_source: form.lead_source, bid_type: form.bid_type, engagement_type: form.engagement_type });
         setTimeout(() => titleRef.current?.focus(), 50);
       } else {
         onClose();
@@ -132,9 +132,9 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
     transition: 'all 0.15s',
   });
 
-  const isUpwork  = form.leadSource === 'Upwork';
-  const isHourly  = form.engagementType === 'Hourly';
-  const autoValue = isHourly ? (form.hourlyRate ?? 0) * (form.estimatedHours ?? 0) : null;
+  const isUpwork  = form.lead_source === 'Upwork';
+  const isHourly  = form.engagement_type === 'Hourly';
+  const autoValue = isHourly ? (form.hourly_rate ?? 0) * (form.estimated_hours ?? 0) : null;
 
   return (
     <Sheet open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -165,7 +165,7 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
             {/* Lead Source */}
             <div className="space-y-1.5">
               <Label>Lead Source *</Label>
-              <Select value={form.leadSource} onValueChange={(v) => patch('leadSource', v as LeadSource)}>
+              <Select value={form.lead_source} onValueChange={(v) => patch('lead_source', v as LeadSource)}>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
                   {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -181,8 +181,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
               ref={titleRef}
               type="text"
               placeholder="e.g. React Dashboard for SaaS Platform"
-              value={form.projectTitle}
-              onChange={(e) => patch('projectTitle', e.target.value)}
+              value={form.project_title}
+              onChange={(e) => patch('project_title', e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSave(true); }}
             />
           </div>
@@ -194,8 +194,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
               <Input
                 type="text"
                 placeholder="https://upwork.com/jobs/..."
-                value={form.upworkLink ?? ''}
-                onChange={(e) => patch('upworkLink', e.target.value)}
+                value={form.upwork_link ?? ''}
+                onChange={(e) => patch('upwork_link', e.target.value)}
               />
             </div>
           )}
@@ -205,11 +205,11 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
             {isUpwork && (
               <div className="space-y-1.5">
                 <Label>Profile Used</Label>
-                <Select value={form.profileUsedId ?? ''} onValueChange={(v) => patch('profileUsedId', v ?? '')}>
+                <Select value={form.profile_used_id ?? ''} onValueChange={(v) => patch('profile_used_id', v ?? '')}>
                   <SelectTrigger><SelectValue placeholder="— Select —" /></SelectTrigger>
                   <SelectContent>
                     {profiles.filter((p) => p.status === 'active').map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.profileName}</SelectItem>
+                      <SelectItem key={p.id} value={p.id}>{p.profile_name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -220,8 +220,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
             <div className="space-y-1.5">
               <Label>Assigned To *</Label>
               <Select
-                value={form.assignedToId}
-                onValueChange={(v) => patch('assignedToId', v ?? '')}
+                value={form.assigned_to_id}
+                onValueChange={(v) => patch('assigned_to_id', v ?? '')}
                 disabled={user.role === 'bd'}
               >
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
@@ -243,7 +243,7 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
                   key={et}
                   type="button"
                   onClick={() => patchEngagement(et)}
-                  style={toggleBtn(form.engagementType === et, et === 'Fixed' ? '15, 108, 189' : '0, 120, 212')}
+                  style={toggleBtn(form.engagement_type === et, et === 'Fixed' ? '15, 108, 189' : '0, 120, 212')}
                 >
                   {et === 'Fixed' ? '💼 Fixed Price' : '⏱ Hourly Rate'}
                 </button>
@@ -263,8 +263,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
                   <Input
                     type="number" min={1} step={1}
                     placeholder="e.g. 45"
-                    value={form.hourlyRate ?? ''}
-                    onChange={(e) => patch('hourlyRate', e.target.value === '' ? undefined : Number(e.target.value))}
+                    value={form.hourly_rate ?? ''}
+                    onChange={(e) => patch('hourly_rate', e.target.value === '' ? undefined : Number(e.target.value))}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -272,8 +272,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
                   <Input
                     type="number" min={1} step={1}
                     placeholder="e.g. 160"
-                    value={form.estimatedHours ?? ''}
-                    onChange={(e) => patch('estimatedHours', e.target.value === '' ? undefined : Number(e.target.value))}
+                    value={form.estimated_hours ?? ''}
+                    onChange={(e) => patch('estimated_hours', e.target.value === '' ? undefined : Number(e.target.value))}
                   />
                 </div>
               </div>
@@ -290,8 +290,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
               <Label>Proposal Value (USD) *</Label>
               <Input
                 type="number" min={0}
-                value={form.proposalValue}
-                onChange={(e) => patch('proposalValue', Number(e.target.value))}
+                value={form.proposal_value}
+                onChange={(e) => patch('proposal_value', Number(e.target.value))}
               />
             </div>
           )}
@@ -301,8 +301,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
               <Label>Connects Used</Label>
               <Input
                 type="number" min={0}
-                value={form.connectsUsed}
-                onChange={(e) => patch('connectsUsed', Number(e.target.value))}
+                value={form.connects_used}
+                onChange={(e) => patch('connects_used', Number(e.target.value))}
               />
             </div>
             <div className="space-y-1.5">
@@ -324,8 +324,8 @@ export default function QuickAddForm({ user, members, profiles, onAdd, onClose }
                 <button
                   key={bt}
                   type="button"
-                  onClick={() => patch('bidType', bt)}
-                  style={toggleBtn(form.bidType === bt, bt === 'Boosted' ? '216, 59, 1' : '15, 108, 189')}
+                  onClick={() => patch('bid_type', bt)}
+                  style={toggleBtn(form.bid_type === bt, bt === 'Boosted' ? '216, 59, 1' : '15, 108, 189')}
                 >
                   {bt}
                 </button>

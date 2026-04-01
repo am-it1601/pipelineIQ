@@ -1,0 +1,48 @@
+import { Suspense } from 'react';
+import LeadTableContent from '@/components/leads/LeadTableContent';
+import { fetchLeads, fetchMembers, fetchProfiles } from './actions';
+import type { BDMember, UpworkProfile } from '@/lib/types';
+
+export default async function LeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+
+  // Convert searchParams to fetch options
+  const fetchOptions = {
+    search: typeof params.search === 'string' ? params.search : undefined,
+    status: typeof params.status === 'string' ? params.status : undefined,
+    source: typeof params.source === 'string' ? params.source : undefined,
+    member: typeof params.member === 'string' ? params.member : undefined,
+    engagement: typeof params.engagement === 'string' ? params.engagement : undefined,
+    bidType: typeof params.bidType === 'string' ? params.bidType : undefined,
+    profile: typeof params.profile === 'string' ? params.profile : undefined,
+    hot: typeof params.hot === 'string' ? params.hot === 'true' : undefined,
+    sortBy: typeof params.sortBy === 'string' ? params.sortBy : 'posted_date',
+    sortDir: (typeof params.sortDir === 'string' ? params.sortDir : 'desc') as 'asc' | 'desc',
+    page: typeof params.page === 'string' ? parseInt(params.page, 10) : 1,
+    pageSize: typeof params.pageSize === 'string' ? parseInt(params.pageSize, 10) : 20,
+  };
+
+  // Fetch all data in parallel on the server using server actions
+  const [leadsData, members, profiles] = await Promise.all([
+    fetchLeads(fetchOptions),
+    fetchMembers(),
+    fetchProfiles(),
+  ]);
+
+  return (
+    <div className="animate-fade-in flex flex-col gap-4">
+      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading leads…</div>}>
+        <LeadTableContent
+          initialLeads={leadsData.data}
+          pagination={leadsData.pagination}
+          members={members}
+          profiles={profiles}
+        />
+      </Suspense>
+    </div>
+  );
+}

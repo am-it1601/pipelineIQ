@@ -41,7 +41,7 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
   const weeklyBD = getWeeklyBDComparison(leads, members.filter(m => m.status === 'active'), 6);
   const profileMomentum = getProfileMomentum(leads, profiles);
 
-  const memberNames = members.filter(m => m.status === 'active').map(m => m.name.split(' ')[0]);
+  const memberNames = members.filter(m => m.status === 'active').map(m => (m.full_name || "").split(' ')[0]);
 
   const cardStyle = "p-5 bg-card text-card-foreground border rounded-lg shadow-sm";
 
@@ -201,7 +201,7 @@ export default function ExtendedKPISections({ leads, members, profiles }: Props)
                     <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--text)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: MEMBER_COLORS[i % MEMBER_COLORS.length] }} />
-                        {row.profileName}
+                        {row.profile_name}
                       </div>
                     </td>
                     <td style={{ padding: '10px 12px' }}>{row.totalBids}</td>

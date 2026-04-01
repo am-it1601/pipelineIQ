@@ -1,96 +1,66 @@
+import { Database } from '@/lib/supabase/database.types';
+
 // ============================================================
 // USER & AUTH TYPES
 // ============================================================
 
-export type UserRole = 'admin' | 'bd';
+export type UserRole = "admin" | "bd";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
+export type User = Database['public']['Tables']['profiles']['Row'] & {
   role: UserRole;
-  bdMemberId: string | null;
-  avatarInitials: string;
-}
+};
 
 // ============================================================
 // BD MEMBER TYPES
 // ============================================================
 
-export type MemberStatus = 'active' | 'inactive';
+export type MemberStatus = "active" | "inactive";
 
-export interface BDMember {
-  id: string;
-  name: string;
+export type OmittedBDMember = Omit<Database['public']['Tables']['profiles']['Row'], 'status'>;
+export interface BDMember extends OmittedBDMember {
   status: MemberStatus;
-  monthlyTarget: number;
-  incentiveEligible: boolean;
-  joinDate: string;
 }
 
 // ============================================================
 // UPWORK PROFILE TYPES
 // ============================================================
 
-export type ProfileStatus = 'active' | 'inactive';
+export type ProfileStatus = "active" | "inactive";
 
-export interface UpworkProfile {
-  id: string;
-  profileName: string;
+export type OmittedUpworkProfile = Omit<Database['public']['Tables']['upwork_profiles']['Row'], 'status'>;
+export interface UpworkProfile extends OmittedUpworkProfile {
   status: ProfileStatus;
-  focusArea: string;
 }
 
 // ============================================================
 // LEAD LOG ENTRY TYPES
 // ============================================================
 
-export type LeadSource = 'Upwork' | 'Referral' | 'LinkedIn' | 'Direct';
-export type BidType = 'Normal' | 'Boosted';
-export type EngagementType = 'Fixed' | 'Hourly';
+export type LeadSource = "Upwork" | "Referral" | "LinkedIn" | "Direct";
+export type BidType = "Normal" | "Boosted";
+export type EngagementType = "Fixed" | "Hourly";
 export type LeadStatus =
-  | 'Submitted'
-  | 'Viewed'
-  | 'Discussion'
-  | 'Follow Up'
-  | 'Waiting Client'
-  | 'Won'
-  | 'Lost';
+  | "Submitted"
+  | "Viewed"
+  | "Discussion"
+  | "Follow Up"
+  | "Waiting Client"
+  | "Won"
+  | "Lost";
 
-export interface LeadLogEntry {
-  id: string;
-  date: string; // YYYY-MM-DD
-  projectTitle: string;
-  leadSource: LeadSource;
-  upworkLink?: string;
-  profileUsedId?: string;
-  assignedToId: string;
+// We extract and augment the raw DB row just to provide stricter string literal types
+// instead of just `string`.
+export type RawLeadLogEntry = Database['public']['Tables']['lead_logs']['Row'];
 
-  /** Engagement type: Fixed (project price) or Hourly (rate × hours) */
-  engagementType: EngagementType;
-
-  /** For Fixed: the total project value. For Hourly: hourlyRate × estimatedHours (auto-computed). */
-  proposalValue: number;
-
-  /** Hourly bids only: proposed $/hr rate */
-  hourlyRate?: number;
-
-  /** Hourly bids only: estimated engagement duration in hours */
-  estimatedHours?: number;
-
-  connectsUsed: number;
-  bidType: BidType;
+export interface LeadLogEntry extends Omit<RawLeadLogEntry, 'lead_source' | 'engagement_type' | 'bid_type' | 'status'> {
+  lead_source: LeadSource;
+  engagement_type: EngagementType;
+  bid_type: BidType;
   status: LeadStatus;
-  remarks?: string;
-  /** Starred/hot lead — surfaces in dashboard quick panels */
-  isHot?: boolean;
-  createdByUserId: string;
-  updatedByUserId: string;
-  createdAt: string;
-  updatedAt: string;
+  assignee?: { full_name: string; avatar_initials: string } | null;
 }
 
-export type NewLeadEntry = Omit<LeadLogEntry, 'id' | 'createdAt' | 'updatedAt'>;
+export type NewLeadEntry = Database['public']['Tables']['lead_logs']['Insert'];
 
 // ============================================================
 // KPI METRIC TYPES
@@ -144,7 +114,7 @@ export interface WeeklyMetric {
   weekStart: string;
   bids: number;
   wins: number;
-  connectsUsed: number;
+  connects_used: number;
   viewedCount: number;
 }
 
@@ -153,7 +123,7 @@ export interface MonthlyMetric {
   month: string;
   bids: number;
   wins: number;
-  connectsUsed: number;
+  connects_used: number;
   pipelineValue: number;
 }
 
@@ -172,13 +142,13 @@ export interface BDPerformanceRow {
   viewRate: number;
   totalConnects: number;
   pipelineValue: number;
-  monthlyTarget: number;
+  monthly_target: number;
   targetCompletion: number;
 }
 
 export interface ProfilePerformanceRow {
   profileId: string;
-  profileName: string;
+  profile_name: string;
   totalBids: number;
   wonCount: number;
   winRate: number;
@@ -197,9 +167,9 @@ export interface LeadFilters {
   dateTo?: string;
   memberId?: string;
   profileId?: string;
-  leadSource?: LeadSource | '';
-  status?: LeadStatus | '';
-  bidType?: BidType | '';
+  leadSource?: LeadSource | "";
+  status?: LeadStatus | "";
+  bidType?: BidType | "";
   search?: string;
 }
 
@@ -208,11 +178,19 @@ export interface LeadFilters {
 // ============================================================
 
 export type Permission =
-  | 'viewAllLeads'
-  | 'editAnyLead'
-  | 'deleteAnyLead'
-  | 'viewTeamAnalytics'
-  | 'manageBDMembers'
-  | 'manageProfiles'
-  | 'viewComparisons'
-  | 'viewPipelineTeam';
+  | "viewAllLeads"
+  | "editAnyLead"
+  | "deleteAnyLead"
+  | "viewTeamAnalytics"
+  | "manageBDMembers"
+  | "manageProfiles"
+  | "viewComparisons"
+  | "viewPipelineTeam";
+
+export type LeadFilter = {
+  status: string;
+  date_from: Date;
+  date_to: Date;
+  assigned_to_id: String;
+  lead_source: String;
+};

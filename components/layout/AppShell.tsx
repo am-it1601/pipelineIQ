@@ -1,22 +1,18 @@
-'use client';
+"use client";
 import { AppSidebar } from "@/components/app-sidebar";
-import Topbar from '@/components/layout/Topbar';
-import {
-  SidebarInset,
-  SidebarProvider
-} from "@/components/ui/sidebar";
+import Topbar from "@/components/layout/Topbar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-screen max-w-screen overflow-hidden">
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col min-h-0">
         <Topbar />
-        <div className="flex flex-col gap-4 p-4 pt-0">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 py-6">
           {children}
         </div>
       </SidebarInset>
-
-    </SidebarProvider >
+    </SidebarProvider>
   );
 }
