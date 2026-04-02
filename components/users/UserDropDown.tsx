@@ -1,7 +1,6 @@
-'use client'
-import { getBDMembers } from '@/lib/actions/user.actions';
-import { BDMember } from '@/lib/types';
-import { useEffect, useState } from 'react';
+'use client';
+import { useMembersStore } from '@/store/membersStore';
+import { useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type DropdownProps = {
@@ -11,32 +10,22 @@ type DropdownProps = {
 };
 
 const UserDropDown = ({ onChangeHandler, value, disabled }: DropdownProps) => {
-
-  const [members, setMembers] = useState<BDMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const members = useMembersStore((s) => s.members);
+  const loading = useMembersStore((s) => s.loading);
+  const fetchIfNeeded = useMembersStore((s) => s.fetchIfNeeded);
 
   useEffect(() => {
-    const loadMembers = async () => {
-      try {
-        const memberList = await getBDMembers({ active: true });
-        memberList && setMembers(memberList);
-      } catch (error) {
-        console.error("Failed to load members:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadMembers();
-  }, []);
+    fetchIfNeeded();
+  }, [fetchIfNeeded]);
 
   return (
     <Select
-      value={value || ""}
-      onValueChange={(v) => onChangeHandler(v === "__all__" ? "" : v)}
+      value={value || ''}
+      onValueChange={(v) => onChangeHandler(v === '__all__' ? '' : v)}
       disabled={loading || disabled}
     >
       <SelectTrigger>
-        <SelectValue placeholder={loading ? "Loading members..." : "All Members"} />
+        <SelectValue placeholder={loading ? 'Loading members...' : 'All Members'} />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="__all__">All Members</SelectItem>

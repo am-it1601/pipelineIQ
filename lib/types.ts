@@ -16,7 +16,7 @@ export type User = Database['public']['Tables']['profiles']['Row'] & {
 
 export type MemberStatus = "active" | "inactive";
 
-export type OmittedBDMember = Omit<Database['public']['Tables']['profiles']['Row'], 'status'>;
+export type OmittedBDMember = Omit<Database['public']['Tables']['bd_members']['Row'], 'status'>;
 export interface BDMember extends OmittedBDMember {
   status: MemberStatus;
 }

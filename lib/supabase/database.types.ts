@@ -91,6 +91,45 @@ export type Database = {
           },
         ]
       }
+      bd_members: {
+        Row: {
+          id: string
+          full_name: string
+          email: string
+          status: string | null
+          monthly_target: number | null
+          incentive_eligible: boolean | null
+          join_date: string | null
+          avatar_initials: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          email: string
+          status?: string | null
+          monthly_target?: number | null
+          incentive_eligible?: boolean | null
+          join_date?: string | null
+          avatar_initials?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          email?: string
+          status?: string | null
+          monthly_target?: number | null
+          incentive_eligible?: boolean | null
+          join_date?: string | null
+          avatar_initials?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_initials: string

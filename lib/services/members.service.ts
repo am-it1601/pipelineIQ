@@ -31,9 +31,8 @@ export async function getMembers(
   options: GetMembersOptions = {}
 ): Promise<BDMember[]> {
   let query = supabase
-    .from("profiles")
-    .select("id, full_full_name, email, status, monthly_target, incentive_eligible, join_date")
-    .eq("role", "bd")
+    .from("bd_members")
+    .select("id, full_name, email, status, monthly_target, incentive_eligible, join_date, avatar_initials, created_at, updated_at")
     .order("full_name", { ascending: true });
 
   if (options.active !== undefined) {
@@ -53,7 +52,7 @@ export async function getMemberById(
   id: string
 ): Promise<BDMember> {
   const { data, error } = await supabase
-    .from("profiles")
+    .from("bd_members")
     .select("*")
     .eq("id", id)
     .single();
@@ -90,39 +89,26 @@ export async function createMemberRecord(
     join_date = new Date().toISOString().split("T")[0],
   } = data;
 
-  const tempPassword = `Temp@${Math.random().toString(36).slice(-8)}!`;
+  const avatar_initials = full_name.substring(0, 2).toUpperCase();
 
-  const { data: authData, error: authError } =
-    await supabase.auth.admin.createUser({
+  const { data: inserted, error } = await supabase
+    .from("bd_members")
+    .insert({
+      full_name,
       email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        full_name: name,
-        role: "bd",
-        avatar_initials: full_name.substring(0, 2).toUpperCase(),
-      },
-    });
-
-  if (authError || !authData.user)
-    throw new Error(authError?.message ?? "Failed to create auth user");
-
-  const userId = authData.user.id;
-
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({
       status,
-      monthly_target: monthly_target,
-      incentive_eligible: incentive_eligible,
-      join_date: join_date,
+      monthly_target,
+      incentive_eligible,
+      join_date,
+      avatar_initials,
     })
-    .eq("id", userId);
+    .select()
+    .single();
 
-  if (profileError)
-    throw new Error(`Failed to update profile: ${profileError.message}`);
+  if (error || !inserted)
+    throw new Error(error?.message ?? "Failed to create BD member");
 
-  return { id: userId, full_name, email, status, monthly_target, incentive_eligible, join_date, avatar_initials: '', bd_member_id: null, created_at: '', updated_at: '', role: 'bd' } as BDMember;
+  return mapRowToMember(inserted);
 }
 
 export interface UpdateMemberData {
@@ -153,7 +139,7 @@ export async function updateMemberRecord(
   if (patch.join_date !== undefined) dbPatch.join_date = patch.join_date;
 
   const { data, error } = await supabase
-    .from("profiles")
+    .from("bd_members")
     .update(dbPatch)
     .eq("id", id)
     .select()
