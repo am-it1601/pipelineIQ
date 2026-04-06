@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useAuthStore } from "@/store/authStore"
-import * as React from "react"
+import { useAuthStore } from "@/store/authStore";
+import * as React from "react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   ChartPieIcon,
   FlagIcon,
@@ -23,82 +23,65 @@ import {
   Table2Icon,
   TagIcon,
   TerminalIcon,
-  Users2Icon
-} from "lucide-react"
+  Users2Icon,
+} from "lucide-react";
 
 const data = {
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
+      icon: <LayoutDashboardIcon />,
       isActive: true,
     },
     {
       title: "Leads",
-      icon: (
-        <FunnelIcon
-        />
-      ),
+      icon: <FunnelIcon />,
       items: [
         {
           title: "Hot Leads",
           url: "/leads",
-          icon: (<Table2Icon />)
+          icon: <Table2Icon />,
         },
 
         {
           title: "Leads Log Entry",
           url: "/leads",
-          icon: (<Table2Icon />)
+          icon: <Table2Icon />,
         },
       ],
     },
     {
       title: "Team Roaster",
-      url: "/members",
-      icon: (
-        <Users2Icon />
-      )
+      url: "/roaster",
+      icon: <Users2Icon />,
     },
     {
       title: "Upwork Profiles",
       url: "/profiles",
-      icon: (
-        <TagIcon
-        />
-      )
+      icon: <TagIcon />,
     },
   ],
   projects: [
     {
       name: "Sales Pipeline Analytics",
       url: "/analytics",
-      icon: (
-        <ChartPieIcon
-        />
-      ),
+      icon: <ChartPieIcon />,
     },
     {
       name: "Reports",
       url: "#",
-      icon: (
-        <FlagIcon
-        />
-      ),
+      icon: <FlagIcon />,
     },
   ],
-}
+};
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const currentUser = useAuthStore((s) => s.currentUser);
 
   const user = {
-    name: currentUser?.full_name ?? 'Guest',
-    email: currentUser?.email ?? '',
-    avatar: '',
+    name: currentUser?.full_name ?? "Guest",
+    email: currentUser?.email ?? "",
+    avatar: "",
   };
 
   return (
@@ -126,5 +109,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

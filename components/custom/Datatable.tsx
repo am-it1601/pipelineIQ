@@ -1,23 +1,18 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { CheckCircle2, RefreshCcwIcon } from "lucide-react";
-import { Button } from "../ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "../ui/empty";
+import { CheckCircle2 } from "lucide-react";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
-const Datatable = ({ columns, data }: DataTableProps<any, any>) => {
+const Datatable = ({ columns, data, emptyTitle, emptyDescription }: DataTableProps<any, any>) => {
   const table = useReactTable({
     data,
     columns,
@@ -25,14 +20,23 @@ const Datatable = ({ columns, data }: DataTableProps<any, any>) => {
   });
 
   return (
-    <div className="overflow-x-auto overflow-y-none">
+    <div className="overflow-x-auto overflow-y-none w-full">
       <Table className="pi-table">
         <TableHeader className="font-semibold">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-primary dark:bg-green-700 hover:bg-primary/80 !text-primary-foreground font-semibold">
+            <TableRow
+              key={headerGroup.id}
+              className="bg-primary dark:bg-green-700 hover:bg-primary/80 text-primary-foreground font-semibold"
+            >
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className={cn((header.column.columnDef.meta as any)?.className, "font-semibold text-primary-foreground")}>
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      (header.column.columnDef.meta as any)?.className,
+                      "font-semibold text-primary-foreground"
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -45,9 +49,16 @@ const Datatable = ({ columns, data }: DataTableProps<any, any>) => {
         <TableBody className="overflow-y-scroll">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="hover:bg-accent">
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className="hover:bg-accent"
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={(cell.column.columnDef.meta as any)?.className}>
+                  <TableCell
+                    key={cell.id}
+                    className={(cell.column.columnDef.meta as any)?.className}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -61,17 +72,17 @@ const Datatable = ({ columns, data }: DataTableProps<any, any>) => {
                     <EmptyMedia variant="icon">
                       <CheckCircle2 />
                     </EmptyMedia>
-                    <EmptyTitle>No Leads</EmptyTitle>
+                    <EmptyTitle>{emptyTitle ?? "No Data Found"}</EmptyTitle>
                     <EmptyDescription className="max-w-xs text-pretty">
-                      You&apos;re all caught up. New Leads will appear here.
+                      {emptyDescription ?? "You're all caught up. New Data will appear here."}
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent>
+                  {/* <EmptyContent>
                     <Button variant="outline">
                       <RefreshCcwIcon />
                       Refresh
                     </Button>
-                  </EmptyContent>
+                  </EmptyContent> */}
                 </Empty>
               </TableCell>
             </TableRow>

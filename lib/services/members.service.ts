@@ -1,5 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BDMember } from "@/lib/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // ============================================================
 // MAPPER
@@ -11,7 +11,7 @@ import type { BDMember } from "@/lib/types";
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapRowToMember(row: Record<string, any>): BDMember {
-  return { ...row, status: row.status ?? 'active' } as BDMember;
+  return { ...row, status: row.status ?? "active" } as BDMember;
 }
 
 // ============================================================
@@ -32,7 +32,10 @@ export async function getMembers(
 ): Promise<BDMember[]> {
   let query = supabase
     .from("bd_members")
-    .select("id, full_name, email, status, monthly_target, incentive_eligible, join_date, avatar_initials, created_at, updated_at")
+    .select(
+      "id, full_name, email, status, monthly_target, incentive_eligible, join_date, avatar_initials, created_at, updated_at"
+    )
+    .eq("is_deleted", false)
     .order("full_name", { ascending: true });
 
   if (options.active !== undefined) {
@@ -47,15 +50,8 @@ export async function getMembers(
 /**
  * Fetches a single BD member by profile ID. Throws if not found.
  */
-export async function getMemberById(
-  supabase: SupabaseClient,
-  id: string
-): Promise<BDMember> {
-  const { data, error } = await supabase
-    .from("bd_members")
-    .select("*")
-    .eq("id", id)
-    .single();
+export async function getMemberById(supabase: SupabaseClient, id: string): Promise<BDMember> {
+  const { data, error } = await supabase.from("bd_members").select("*").eq("id", id).single();
 
   if (error || !data) throw new Error("Member not found");
   return mapRowToMember(data);
@@ -105,8 +101,7 @@ export async function createMemberRecord(
     .select()
     .single();
 
-  if (error || !inserted)
-    throw new Error(error?.message ?? "Failed to create BD member");
+  if (error || !inserted) throw new Error(error?.message ?? "Failed to create BD member");
 
   return mapRowToMember(inserted);
 }
@@ -132,10 +127,8 @@ export async function updateMemberRecord(
   if (patch.full_name !== undefined) dbPatch.full_name = patch.full_name;
   if (patch.full_name !== undefined) dbPatch.full_name = patch.full_name;
   if (patch.status !== undefined) dbPatch.status = patch.status;
-  if (patch.monthly_target !== undefined)
-    dbPatch.monthly_target = patch.monthly_target;
-  if (patch.incentive_eligible !== undefined)
-    dbPatch.incentive_eligible = patch.incentive_eligible;
+  if (patch.monthly_target !== undefined) dbPatch.monthly_target = patch.monthly_target;
+  if (patch.incentive_eligible !== undefined) dbPatch.incentive_eligible = patch.incentive_eligible;
   if (patch.join_date !== undefined) dbPatch.join_date = patch.join_date;
 
   const { data, error } = await supabase
@@ -160,10 +153,14 @@ export async function updateMemberRecord(
 /**
  * Deletes a BD member's Auth user (cascades to profile via DB trigger).
  */
-export async function deleteMemberRecord(
-  supabase: SupabaseClient,
-  id: string
-): Promise<void> {
+export async function deleteMemberRecord(supabase: SupabaseClient, id: string): Promise<void> {
   const { error } = await supabase.auth.admin.deleteUser(id);
   if (error) throw new Error(`Failed to delete member: ${error.message}`);
+}
+
+export async function deactivateMember(superbase: SupabaseClient, id: string): Promise<void> {
+  // TRANSACTION STARTS
+  // TODO : Ban User from authentication.
+  // TODO : If BD Member : Then mark bd_member as inactive.
+  // TRANSACTION COMMIT
 }

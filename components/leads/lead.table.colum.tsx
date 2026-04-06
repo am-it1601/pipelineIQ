@@ -1,3 +1,4 @@
+"use client";
 import { toggleLeadHotStatus } from "@/lib/actions/leads.action";
 import type { LeadLogEntry } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -10,7 +11,7 @@ import {
   Star,
   TrendingUp,
   User,
-  Zap
+  Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -36,15 +37,28 @@ const HotToggleCell = ({ lead }: { lead: LeadLogEntry }) => {
     const tr = cellRef.current?.closest("tr");
     if (tr) {
       if (isHot) {
-        tr.classList.add("bg-amber-100/40", "dark:bg-amber-700/40", "hover:!bg-amber-100/90", "dark:hover:bg-amber-900/30");
+        tr.classList.add(
+          "bg-amber-100/40",
+          "dark:bg-amber-700/40",
+          "hover:!bg-amber-100/90",
+          "dark:hover:bg-amber-900/30"
+        );
       } else {
-        tr.classList.remove("bg-amber-100/40", "dark:bg-amber-700/40", "hover:bg-amber-100/50", "dark:hover:bg-amber-900/30");
+        tr.classList.remove(
+          "bg-amber-100/40",
+          "dark:bg-amber-700/40",
+          "hover:bg-amber-100/50",
+          "dark:hover:bg-amber-900/30"
+        );
       }
     }
   }, [isHot]);
 
   return (
-    <div ref={cellRef} className="flex items-center gap-1 text-center align-middle place-content-center">
+    <div
+      ref={cellRef}
+      className="flex items-center gap-1 text-center align-middle place-content-center"
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -69,7 +83,9 @@ const HotToggleCell = ({ lead }: { lead: LeadLogEntry }) => {
         }}
         title={isHot ? "Unmark as hot" : "Mark as hot"}
       >
-        <Star className={`size-4 ${isHot ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
+        <Star
+          className={`size-4 ${isHot ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`}
+        />
       </Button>
     </div>
   );
@@ -102,14 +118,18 @@ export const LeadTableColumns: ColumnDef<LeadLogEntry>[] = [
       const dateStr = row.getValue<string>("date");
       if (!dateStr) return null;
       const dateObj = new Date(dateStr);
-      const day = dateObj.getDate().toString().padStart(2, '0');
-      const month = dateObj.toLocaleString('default', { month: 'short' });
+      const day = dateObj.getDate().toString().padStart(2, "0");
+      const month = dateObj.toLocaleString("default", { month: "short" });
 
       return (
         <div className="flex flex-col items-center justify-center bg-background border border-border/50 rounded-md shrink-0 w-9 h-10 shadow-sm mt-1 mb-1 relative overflow-hidden group">
           <div className="absolute top-0 w-full h-1.5 bg-primary/20 group-hover:bg-primary/40 transition-colors"></div>
-          <span className="text-xs font-bold leading-none mt-1 group-hover:text-primary transition-colors">{day}</span>
-          <span className="text-[9px] text-muted-foreground uppercase font-semibold mt-0.5 tracking-wider">{month}</span>
+          <span className="text-xs font-bold leading-none mt-1 group-hover:text-primary transition-colors">
+            {day}
+          </span>
+          <span className="text-[9px] text-muted-foreground uppercase font-semibold mt-0.5 tracking-wider">
+            {month}
+          </span>
         </div>
       );
     },
@@ -130,21 +150,22 @@ export const LeadTableColumns: ColumnDef<LeadLogEntry>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <span className="max-w-xs truncate font-semibold text-sm" title={String(title)}>{String(title)}</span>
+          <span className="max-w-xs truncate font-semibold text-sm" title={String(title)}>
+            {String(title)}
+          </span>
           <EngagementTypeBadge type={eType} />
           <LeadSourceBadge source={source} />
-          {
-            bid_type === 'Boosted' && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <TrendingUp className="size-4 dark:text-amber-300 text-amber-500 motion-safe:animate-bounce" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <TrendingUp className="size-4 text-amber-400 fill-amber-400" />
-                  <p>Boosted proposal</p>
-                </TooltipContent>
-              </Tooltip>)
-          }
+          {bid_type === "Boosted" && (
+            <Tooltip>
+              <TooltipTrigger>
+                <TrendingUp className="size-4 dark:text-amber-300 text-amber-500 motion-safe:animate-bounce" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <TrendingUp className="size-4 text-amber-400 fill-amber-400" />
+                <p>Boosted proposal</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       );
     },
@@ -198,12 +219,15 @@ export const LeadTableColumns: ColumnDef<LeadLogEntry>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const value = row.getValue<number>('connects_used');
-      return value > 0 && <div className="flex place-content-center" >
-        <Badge variant="default">{value}</Badge>
-      </div >
-    }
-    ,
+      const value = row.getValue<number>("connects_used");
+      return (
+        value > 0 && (
+          <div className="flex place-content-center">
+            <Badge variant="default">{value}</Badge>
+          </div>
+        )
+      );
+    },
   },
 
   {
@@ -217,7 +241,8 @@ export const LeadTableColumns: ColumnDef<LeadLogEntry>[] = [
     ),
     cell: ({ row }) => {
       const assignee = row.original.assignee;
-      if (!assignee) return <span className="text-muted-foreground italic text-xs">Unassigned</span>;
+      if (!assignee)
+        return <span className="text-muted-foreground italic text-xs">Unassigned</span>;
 
       return (
         <div className="flex justify-center items-center text-center place-content-center">

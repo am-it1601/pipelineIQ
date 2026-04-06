@@ -11,6 +11,31 @@ export type User = Database['public']['Tables']['profiles']['Row'] & {
 };
 
 // ============================================================
+// INVITATION TYPES
+// ============================================================
+
+export type InvitationRole = 'admin' | 'bd_member';
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+export type RawInvitation = Database['public']['Tables']['invitations']['Row'];
+
+export interface Invitation extends Omit<RawInvitation, 'role' | 'status' | 'invited_by'> {
+  role: InvitationRole;
+  status: InvitationStatus;
+  /** Joined from profiles — name of the admin who sent the invite */
+  invited_by: {
+    full_name: string;
+    avatar_initials: string;
+  } | null;
+}
+
+// ============================================================
+// APP SETTINGS TYPES
+// ============================================================
+
+export type AppSetting = Database['public']['Tables']['app_settings']['Row'];
+
+// ============================================================
 // BD MEMBER TYPES
 // ============================================================
 

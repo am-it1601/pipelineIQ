@@ -2,6 +2,7 @@
 // https://tailwindcss.com/docs/font-family
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import SupabaseAuthProvider from "@/components/providers/SupabaseAuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Geist, IBM_Plex_Mono, Noto_Serif } from "next/font/google";
 import "./globals.css";
@@ -42,6 +43,7 @@ export default function RootLayout({
         >
           <SupabaseAuthProvider>
             {children}
+            <Toaster richColors />
           </SupabaseAuthProvider>
         </ThemeProvider>
       </body>

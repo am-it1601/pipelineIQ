@@ -1,0 +1,47 @@
+# Supabase Configuration File
+
+[project]
+account_id = "placeholder_account_id"
+database_password = "postgres"
+db_url = "postgresql://postgres:[YOUR_PASSWORD]@127.0.0.1:54322/postgres"
+default_region = "us-east-1"
+edition = "free"
+project_id = "placeholder_project_id"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[realtime]
+enabled = true
+max_bytes_per_second = 1048576
+
+[auth]
+enabled = true
+external_url = "http://localhost:3000"
+jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+jwt_exp = 3600
+enable_signup = false
+
+[services.vector]
+enabled = false
+
+[analytics]
+enabled = false
+
+[studio]
+enabled = true
+port = 54323
+
+[storage]
+file_size_limit_bytes = 52428800
+
+[functions]
+import_maps = []
