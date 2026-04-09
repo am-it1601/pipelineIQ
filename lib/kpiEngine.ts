@@ -4,31 +4,31 @@
  * and return typed metric objects. No UI dependencies.
  */
 
-import type {
-  LeadLogEntry,
-  User,
-  BDMember,
-  UpworkProfile,
-  ActivityKPIs,
-  EngagementKPIs,
-  ConversionKPIs,
-  CostKPIs,
-  PipelineKPIs,
-  WeeklyMetric,
-  MonthlyMetric,
-  FunnelStep,
-  BDPerformanceRow,
-  ProfilePerformanceRow,
-} from '@/lib/types';
 import {
-  getWeekKey,
-  getWeekLabel,
+  getCurrentMonthKey,
+  getCurrentWeekStart,
   getMonthKey,
   getMonthLabel,
-  getCurrentWeekStart,
-  getCurrentMonthKey,
-} from '@/lib/utils';
-import { subWeeks, subMonths, format, addWeeks, addMonths, parseISO } from 'date-fns';
+  getWeekKey,
+  getWeekLabel,
+} from "@/lib/utils";
+import type {
+  ActivityKPIs,
+  BDMember,
+  BDPerformanceRow,
+  ConversionKPIs,
+  CostKPIs,
+  EngagementKPIs,
+  FunnelStep,
+  LeadLogEntry,
+  MonthlyMetric,
+  PipelineKPIs,
+  ProfilePerformanceRow,
+  UpworkProfile,
+  User,
+  WeeklyMetric,
+} from "@/types/types";
+import { addWeeks, format, parseISO, subMonths, subWeeks } from "date-fns";
 
 // ─── Scoping ─────────────────────────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ import { subWeeks, subMonths, format, addWeeks, addMonths, parseISO } from 'date
  * - BD users see only their own (matched via bd_member_id).
  */
 export function getScopedLeads(leads: LeadLogEntry[], user: User): LeadLogEntry[] {
-  if (user.role === 'admin') return leads;
+  if (user.role === "admin") return leads;
   return leads.filter((l) => l.assigned_to_id === user.bd_member_id);
 }
 
@@ -46,15 +46,12 @@ export function getScopedLeads(leads: LeadLogEntry[], user: User): LeadLogEntry[
 
 /** A lead is "active" if it is not Won or Lost */
 function isActive(lead: LeadLogEntry): boolean {
-  return lead.status !== 'Won' && lead.status !== 'Lost';
+  return lead.status !== "Won" && lead.status !== "Lost";
 }
 
 // ─── Activity KPIs ────────────────────────────────────────────────────────────
 
-export function getActivityKPIs(
-  leads: LeadLogEntry[],
-  activeBDCount: number
-): ActivityKPIs {
+export function getActivityKPIs(leads: LeadLogEntry[], activeBDCount: number): ActivityKPIs {
   const now = new Date();
   const currentWeek = getCurrentWeekStart();
   const currentMonth = getCurrentMonthKey();
@@ -79,15 +76,13 @@ export function getActivityKPIs(
 export function getEngagementKPIs(leads: LeadLogEntry[]): EngagementKPIs {
   const total = leads.length;
   const viewedCount = leads.filter(
-    (l) => l.status === 'Viewed' || l.status === 'Discussion' || l.status === 'Won'
+    (l) => l.status === "Viewed" || l.status === "Discussion" || l.status === "Won"
   ).length;
   const discussionCount = leads.filter(
-    (l) => l.status === 'Discussion' || l.status === 'Won'
+    (l) => l.status === "Discussion" || l.status === "Won"
   ).length;
-  const followUpCount = leads.filter((l) => l.status === 'Follow Up').length;
-  const respondedCount = leads.filter(
-    (l) => l.status !== 'Submitted'
-  ).length;
+  const followUpCount = leads.filter((l) => l.status === "Follow Up").length;
+  const respondedCount = leads.filter((l) => l.status !== "Submitted").length;
 
   return {
     viewedCount,
@@ -103,10 +98,10 @@ export function getEngagementKPIs(leads: LeadLogEntry[]): EngagementKPIs {
 
 export function getConversionKPIs(leads: LeadLogEntry[]): ConversionKPIs {
   const total = leads.length;
-  const wonCount = leads.filter((l) => l.status === 'Won').length;
-  const lostCount = leads.filter((l) => l.status === 'Lost').length;
+  const wonCount = leads.filter((l) => l.status === "Won").length;
+  const lostCount = leads.filter((l) => l.status === "Lost").length;
   const discussionCount = leads.filter(
-    (l) => l.status === 'Discussion' || l.status === 'Won'
+    (l) => l.status === "Discussion" || l.status === "Won"
   ).length;
 
   return {
@@ -123,14 +118,14 @@ export function getConversionKPIs(leads: LeadLogEntry[]): ConversionKPIs {
 
 export function getCostKPIs(leads: LeadLogEntry[]): CostKPIs {
   const totalConnects = leads.reduce((sum, l) => sum + l.connects_used, 0);
-  const wonLeads = leads.filter((l) => l.status === 'Won');
+  const wonLeads = leads.filter((l) => l.status === "Won");
   const wonConnects = wonLeads.reduce((sum, l) => sum + l.connects_used, 0);
   const wonValue = wonLeads.reduce((sum, l) => sum + l.proposal_value, 0);
 
-  const boosted = leads.filter((l) => l.bid_type === 'Boosted');
-  const normal = leads.filter((l) => l.bid_type === 'Normal');
-  const boostedWon = boosted.filter((l) => l.status === 'Won').length;
-  const normalWon = normal.filter((l) => l.status === 'Won').length;
+  const boosted = leads.filter((l) => l.bid_type === "Boosted");
+  const normal = leads.filter((l) => l.bid_type === "Normal");
+  const boostedWon = boosted.filter((l) => l.status === "Won").length;
+  const normalWon = normal.filter((l) => l.status === "Won").length;
 
   return {
     avgConnectsPerBid: leads.length > 0 ? totalConnects / leads.length : 0,
@@ -147,7 +142,7 @@ export function getCostKPIs(leads: LeadLogEntry[]): CostKPIs {
 
 export function getPipelineKPIs(leads: LeadLogEntry[]): PipelineKPIs {
   const activeLeads = leads.filter(isActive);
-  const wonLeads = leads.filter((l) => l.status === 'Won');
+  const wonLeads = leads.filter((l) => l.status === "Won");
   const pipelineValue = activeLeads.reduce((sum, l) => sum + l.proposal_value, 0);
   const wonValue = wonLeads.reduce((sum, l) => sum + l.proposal_value, 0);
   const winRate = leads.length > 0 ? wonLeads.length / leads.length : 0;
@@ -165,18 +160,18 @@ export function getPipelineKPIs(leads: LeadLogEntry[]): PipelineKPIs {
 export function getWeeklyMetrics(leads: LeadLogEntry[], weeksBack = 8): WeeklyMetric[] {
   const weeks: WeeklyMetric[] = [];
   for (let i = weeksBack - 1; i >= 0; i--) {
-    const weekStart = format(subWeeks(new Date(), i), 'yyyy-MM-dd');
-    const weekEnd = format(addWeeks(parseISO(weekStart), 1), 'yyyy-MM-dd');
+    const weekStart = format(subWeeks(new Date(), i), "yyyy-MM-dd");
+    const weekEnd = format(addWeeks(parseISO(weekStart), 1), "yyyy-MM-dd");
     const weekLeads = leads.filter((l) => l.date >= weekStart && l.date < weekEnd);
 
     weeks.push({
       weekLabel: getWeekLabel(weekStart),
       weekStart,
       bids: weekLeads.length,
-      wins: weekLeads.filter((l) => l.status === 'Won').length,
+      wins: weekLeads.filter((l) => l.status === "Won").length,
       connects_used: weekLeads.reduce((s, l) => s + l.connects_used, 0),
       viewedCount: weekLeads.filter(
-        (l) => l.status === 'Viewed' || l.status === 'Discussion' || l.status === 'Won'
+        (l) => l.status === "Viewed" || l.status === "Discussion" || l.status === "Won"
       ).length,
     });
   }
@@ -189,7 +184,7 @@ export function getMonthlyMetrics(leads: LeadLogEntry[], monthsBack = 6): Monthl
   const months: MonthlyMetric[] = [];
   for (let i = monthsBack - 1; i >= 0; i--) {
     const monthDate = subMonths(new Date(), i);
-    const month = format(monthDate, 'yyyy-MM');
+    const month = format(monthDate, "yyyy-MM");
     const monthLeads = leads.filter((l) => getMonthKey(l.date) === month);
     const activeLeads = monthLeads.filter(isActive);
 
@@ -197,7 +192,7 @@ export function getMonthlyMetrics(leads: LeadLogEntry[], monthsBack = 6): Monthl
       monthLabel: getMonthLabel(month),
       month,
       bids: monthLeads.length,
-      wins: monthLeads.filter((l) => l.status === 'Won').length,
+      wins: monthLeads.filter((l) => l.status === "Won").length,
       connects_used: monthLeads.reduce((s, l) => s + l.connects_used, 0),
       pipelineValue: activeLeads.reduce((s, l) => s + l.proposal_value, 0),
     });
@@ -212,37 +207,31 @@ export function getFunnelMetrics(leads: LeadLogEntry[]): FunnelStep[] {
   const countStatus = (s: string) => leads.filter((l) => l.status === s).length;
 
   const submitted = total;
-  const viewed =
-    leads.filter(
-      (l) => l.status === 'Viewed' || l.status === 'Discussion' || l.status === 'Won'
-    ).length;
-  const discussion = leads.filter(
-    (l) => l.status === 'Discussion' || l.status === 'Won'
+  const viewed = leads.filter(
+    (l) => l.status === "Viewed" || l.status === "Discussion" || l.status === "Won"
   ).length;
-  const won = countStatus('Won');
+  const discussion = leads.filter((l) => l.status === "Discussion" || l.status === "Won").length;
+  const won = countStatus("Won");
 
   return [
-    { stage: 'Submitted', count: submitted, rate: 1 },
-    { stage: 'Viewed', count: viewed, rate: total > 0 ? viewed / total : 0 },
-    { stage: 'Discussion', count: discussion, rate: total > 0 ? discussion / total : 0 },
-    { stage: 'Won', count: won, rate: total > 0 ? won / total : 0 },
+    { stage: "Submitted", count: submitted, rate: 1 },
+    { stage: "Viewed", count: viewed, rate: total > 0 ? viewed / total : 0 },
+    { stage: "Discussion", count: discussion, rate: total > 0 ? discussion / total : 0 },
+    { stage: "Won", count: won, rate: total > 0 ? won / total : 0 },
   ];
 }
 
 // ─── BD Performance ───────────────────────────────────────────────────────────
 
-export function getBDPerformance(
-  leads: LeadLogEntry[],
-  members: BDMember[]
-): BDPerformanceRow[] {
+export function getBDPerformance(leads: LeadLogEntry[], members: BDMember[]): BDPerformanceRow[] {
   const currentMonth = getCurrentMonthKey();
 
   return members.map((member) => {
     const memberLeads = leads.filter((l) => l.assigned_to_id === member.id);
     const monthlyLeads = memberLeads.filter((l) => getMonthKey(l.date) === currentMonth);
-    const wonLeads = memberLeads.filter((l) => l.status === 'Won');
+    const wonLeads = memberLeads.filter((l) => l.status === "Won");
     const viewedLeads = memberLeads.filter(
-      (l) => l.status === 'Viewed' || l.status === 'Discussion' || l.status === 'Won'
+      (l) => l.status === "Viewed" || l.status === "Discussion" || l.status === "Won"
     );
     const activeLeads = memberLeads.filter(isActive);
 
@@ -270,9 +259,9 @@ export function getProfilePerformance(
 ): ProfilePerformanceRow[] {
   return profiles.map((profile) => {
     const profileLeads = leads.filter((l) => l.profile_used_id === profile.id);
-    const wonLeads = profileLeads.filter((l) => l.status === 'Won');
-    const boostedLeads = profileLeads.filter((l) => l.bid_type === 'Boosted');
-    const normalLeads = profileLeads.filter((l) => l.bid_type === 'Normal');
+    const wonLeads = profileLeads.filter((l) => l.status === "Won");
+    const boostedLeads = profileLeads.filter((l) => l.bid_type === "Boosted");
+    const normalLeads = profileLeads.filter((l) => l.bid_type === "Normal");
     const activeLeads = profileLeads.filter(isActive);
 
     return {
@@ -292,10 +281,10 @@ export function getProfilePerformance(
 // ─── Source Breakdown ─────────────────────────────────────────────────────────
 
 export function getSourceBreakdown(leads: LeadLogEntry[]) {
-  const sources = ['Upwork', 'Referral', 'LinkedIn', 'Direct'] as const;
+  const sources = ["Upwork", "Referral", "LinkedIn", "Direct"] as const;
   return sources.map((source) => {
     const sourceLeads = leads.filter((l) => l.lead_source === source);
-    const won = sourceLeads.filter((l) => l.status === 'Won').length;
+    const won = sourceLeads.filter((l) => l.status === "Won").length;
     return {
       source,
       total: sourceLeads.length,
@@ -309,8 +298,8 @@ export function getSourceBreakdown(leads: LeadLogEntry[]) {
 
 export function getWoWChange(leads: LeadLogEntry[]) {
   const thisWeek = getCurrentWeekStart();
-  const lastWeek = format(subWeeks(parseISO(thisWeek), 1), 'yyyy-MM-dd');
-  const nextWeekStart = format(addWeeks(parseISO(thisWeek), 1), 'yyyy-MM-dd');
+  const lastWeek = format(subWeeks(parseISO(thisWeek), 1), "yyyy-MM-dd");
+  const nextWeekStart = format(addWeeks(parseISO(thisWeek), 1), "yyyy-MM-dd");
 
   const tw = leads.filter((l) => l.date >= thisWeek && l.date < nextWeekStart);
   const lw = leads.filter((l) => l.date >= lastWeek && l.date < thisWeek);
@@ -321,14 +310,14 @@ export function getWoWChange(leads: LeadLogEntry[]) {
     thisWeekBids: tw.length,
     lastWeekBids: lw.length,
     bidsDelta: delta(tw.length, lw.length),
-    thisWeekWins: tw.filter((l) => l.status === 'Won').length,
-    lastWeekWins: lw.filter((l) => l.status === 'Won').length,
+    thisWeekWins: tw.filter((l) => l.status === "Won").length,
+    lastWeekWins: lw.filter((l) => l.status === "Won").length,
   };
 }
 
 export function getMoMChange(leads: LeadLogEntry[]) {
   const thisMonth = getCurrentMonthKey();
-  const lastMonth = format(subMonths(new Date(), 1), 'yyyy-MM');
+  const lastMonth = format(subMonths(new Date(), 1), "yyyy-MM");
 
   const tm = leads.filter((l) => getMonthKey(l.date) === thisMonth);
   const lm = leads.filter((l) => getMonthKey(l.date) === lastMonth);
@@ -339,8 +328,8 @@ export function getMoMChange(leads: LeadLogEntry[]) {
     thisMonthBids: tm.length,
     lastMonthBids: lm.length,
     bidsDelta: delta(tm.length, lm.length),
-    thisMonthWins: tm.filter((l) => l.status === 'Won').length,
-    lastMonthWins: lm.filter((l) => l.status === 'Won').length,
+    thisMonthWins: tm.filter((l) => l.status === "Won").length,
+    lastMonthWins: lm.filter((l) => l.status === "Won").length,
   };
 }
 
@@ -360,13 +349,10 @@ export interface AvgBidsPerDayRow {
   avgLast30: number;
 }
 
-export function getAvgBidsPerDay(
-  leads: LeadLogEntry[],
-  members: BDMember[]
-): AvgBidsPerDayRow[] {
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const last7 = format(subWeeks(new Date(), 1), 'yyyy-MM-dd');
-  const last30 = format(subWeeks(new Date(), 4), 'yyyy-MM-dd');
+export function getAvgBidsPerDay(leads: LeadLogEntry[], members: BDMember[]): AvgBidsPerDayRow[] {
+  const today = format(new Date(), "yyyy-MM-dd");
+  const last7 = format(subWeeks(new Date(), 1), "yyyy-MM-dd");
+  const last30 = format(subWeeks(new Date(), 4), "yyyy-MM-dd");
 
   return members.map((member) => {
     const memberLeads = leads.filter((l) => l.assigned_to_id === member.id);
@@ -406,8 +392,8 @@ export function getWeeklyBDComparison(
 ): WeeklyBDRow[] {
   const weeks: WeeklyBDRow[] = [];
   for (let i = weeksBack - 1; i >= 0; i--) {
-    const weekStart = format(subWeeks(new Date(), i), 'yyyy-MM-dd');
-    const weekEnd = format(addWeeks(parseISO(weekStart), 1), 'yyyy-MM-dd');
+    const weekStart = format(subWeeks(new Date(), i), "yyyy-MM-dd");
+    const weekEnd = format(addWeeks(parseISO(weekStart), 1), "yyyy-MM-dd");
     const entry: WeeklyBDRow = {
       weekLabel: getWeekLabel(weekStart),
       weekStart,
@@ -417,7 +403,7 @@ export function getWeeklyBDComparison(
         (l) => l.assigned_to_id === member.id && l.date >= weekStart && l.date < weekEnd
       ).length;
       // use first name for shorter chart labels
-      entry[member.full_name.split(' ')[0]] = count;
+      entry[member.full_name.split(" ")[0]] = count;
     }
     weeks.push(entry);
   }
@@ -441,20 +427,20 @@ export function getProfileMomentum(
   leads: LeadLogEntry[],
   profiles: UpworkProfile[]
 ): ProfileMomentumRow[] {
-  const last4Weeks = format(subWeeks(new Date(), 4), 'yyyy-MM-dd');
+  const last4Weeks = format(subWeeks(new Date(), 4), "yyyy-MM-dd");
 
   return profiles.map((profile) => {
     const profileLeads = leads.filter((l) => l.profile_used_id === profile.id);
-    const wonLeads = profileLeads.filter((l) => l.status === 'Won');
-    const boostedLeads = profileLeads.filter((l) => l.bid_type === 'Boosted');
-    const normalLeads = profileLeads.filter((l) => l.bid_type === 'Normal');
+    const wonLeads = profileLeads.filter((l) => l.status === "Won");
+    const boostedLeads = profileLeads.filter((l) => l.bid_type === "Boosted");
+    const normalLeads = profileLeads.filter((l) => l.bid_type === "Normal");
     const activeLeads = profileLeads.filter(isActive);
 
     const overallWinRate = profileLeads.length > 0 ? wonLeads.length / profileLeads.length : 0;
 
     // Recent performance (last 4 weeks)
     const recentLeads = profileLeads.filter((l) => l.date >= last4Weeks);
-    const recentWon = recentLeads.filter((l) => l.status === 'Won').length;
+    const recentWon = recentLeads.filter((l) => l.status === "Won").length;
     const recentWinRate = recentLeads.length > 0 ? recentWon / recentLeads.length : 0;
 
     const avgProposalValue =
@@ -499,23 +485,21 @@ export interface EngagementTypeKPIs {
 }
 
 export function getEngagementTypeKPIs(leads: LeadLogEntry[]): EngagementTypeKPIs {
-  const fixed  = leads.filter((l) => l.engagement_type === 'Fixed');
-  const hourly = leads.filter((l) => l.engagement_type === 'Hourly');
-  const total  = leads.length || 1;
+  const fixed = leads.filter((l) => l.engagement_type === "Fixed");
+  const hourly = leads.filter((l) => l.engagement_type === "Hourly");
+  const total = leads.length || 1;
 
   const winRate = (arr: LeadLogEntry[]) =>
-    arr.length > 0 ? arr.filter((l) => l.status === 'Won').length / arr.length : 0;
+    arr.length > 0 ? arr.filter((l) => l.status === "Won").length / arr.length : 0;
 
   const avgVal = (arr: LeadLogEntry[]) =>
     arr.length > 0 ? arr.reduce((s, l) => s + l.proposal_value, 0) / arr.length : 0;
 
   const activeHourly = hourly.filter(isActive);
-  const activeFixed  = fixed.filter(isActive);
+  const activeFixed = fixed.filter(isActive);
 
   const avgHourlyRate =
-    hourly.length > 0
-      ? hourly.reduce((s, l) => s + (l.hourly_rate ?? 0), 0) / hourly.length
-      : 0;
+    hourly.length > 0 ? hourly.reduce((s, l) => s + (l.hourly_rate ?? 0), 0) / hourly.length : 0;
 
   const avgEstimatedHours =
     hourly.length > 0
@@ -523,18 +507,18 @@ export function getEngagementTypeKPIs(leads: LeadLogEntry[]): EngagementTypeKPIs
       : 0;
 
   return {
-    fixedCount:  fixed.length,
+    fixedCount: fixed.length,
     hourlyCount: hourly.length,
-    fixedShare:  fixed.length / total,
+    fixedShare: fixed.length / total,
     hourlyShare: hourly.length / total,
-    fixedWinRate:  winRate(fixed),
+    fixedWinRate: winRate(fixed),
     hourlyWinRate: winRate(hourly),
-    avgFixedValue:  avgVal(fixed),
+    avgFixedValue: avgVal(fixed),
     avgHourlyValue: avgVal(hourly),
     avgHourlyRate,
     avgEstimatedHours,
     totalHourlyHours: activeHourly.reduce((s, l) => s + (l.estimated_hours ?? 0), 0),
-    fixedPipelineValue:  activeFixed.reduce((s, l) => s + l.proposal_value, 0),
+    fixedPipelineValue: activeFixed.reduce((s, l) => s + l.proposal_value, 0),
     hourlyPipelineValue: activeHourly.reduce((s, l) => s + l.proposal_value, 0),
   };
 }

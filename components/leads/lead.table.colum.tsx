@@ -1,7 +1,7 @@
 "use client";
-import { toggleLeadHotStatus } from "@/lib/actions/leads.action";
-import type { LeadLogEntry } from "@/lib/types";
+import { toggleLeadHotStatus } from "@/lib/actions_old/leads.action";
 import { formatCurrency } from "@/lib/utils";
+import type { LeadLogEntry } from "@/types/types";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   Briefcase,

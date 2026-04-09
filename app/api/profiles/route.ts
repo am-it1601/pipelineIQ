@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { getProfiles, createProfileRecord } from '@/lib/services/profiles.service';
+import { UpworkProfileFormValues, upworkProfileSchema } from "@/components/profiles/profile.schema";
+import { createProfileRecord, getProfiles } from "@/lib/services/profiles.service";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
   try {
@@ -8,32 +9,40 @@ export async function GET() {
     const profiles = await getProfiles(supabase);
     return NextResponse.json(profiles);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { profile_name, profile_link, focus_area, skill_tags, status } = body;
+    const body: UpworkProfileFormValues = await req.json();
 
-    if (!profile_name) {
-      return NextResponse.json({ error: 'Profile name is required' }, { status: 400 });
-    }
+    // Validate request body using Zod schema
+    const { skill_tags, ...validatedData } = upworkProfileSchema.parse(body);
 
     const supabase = createAdminClient();
     const profile = await createProfileRecord(supabase, {
-      profile_name,
-      profile_link,
-      focus_area,
-      skill_tags,
-      status,
+      ...validatedData,
+      skill_tags: skill_tags.join(","), // Convert array to comma-separated string
+      status: "active",
     });
 
     return NextResponse.json(profile, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Insert failed';
+    // Handle Zod validation errors
+    if (error instanceof Error && error.name === "ZodError") {
+      const zodError = error as any;
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: zodError.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const message = error instanceof Error ? error.message : "Insert failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -14,12 +14,12 @@ import {
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
+import { useAuth } from "@/hooks/useAuth";
 import { usePagination } from "@/hooks/usePagination";
-import { getLeads } from "@/lib/actions/leads.action";
-import type { LeadFiltersInput } from "@/lib/services/leads.service";
+import { getLeads } from "@/lib/actions_old/leads.action";
 import { BID_TYPES, ENGAGEMENT_TYPES, LEAD_SOURCES, STATUSES } from "@/lib/constants";
-import { useAuth } from "@/lib/hooks/useAuth";
-import type { LeadLogEntry } from "@/lib/types";
+import type { LeadFiltersInput } from "@/lib/services/leads.service";
+import type { LeadLogEntry } from "@/types/types";
 import Datatable from "../custom/Datatable";
 import ProfileDropdown from "../profiles/ProfileDropdown";
 import { Field, FieldLabel } from "../ui/field";
@@ -338,12 +338,20 @@ const LeadContent = () => {
                     {firstInRange > 1 && (
                       <>
                         <PaginationItem>
-                          <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(1); }}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(1);
+                            }}
+                          >
                             1
                           </PaginationLink>
                         </PaginationItem>
                         {firstInRange > 2 && (
-                          <PaginationItem><PaginationEllipsis /></PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
                         )}
                       </>
                     )}
@@ -353,7 +361,10 @@ const LeadContent = () => {
                       <PaginationItem key={page}>
                         <PaginationLink
                           href="#"
-                          onClick={(e) => { e.preventDefault(); handlePageChange(page); }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page);
+                          }}
                           isActive={page === currentPage}
                         >
                           {page}
@@ -365,10 +376,18 @@ const LeadContent = () => {
                     {lastInRange < totalPages && (
                       <>
                         {lastInRange < totalPages - 1 && (
-                          <PaginationItem><PaginationEllipsis /></PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
                         )}
                         <PaginationItem>
-                          <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(totalPages); }}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(totalPages);
+                            }}
+                          >
                             {totalPages}
                           </PaginationLink>
                         </PaginationItem>

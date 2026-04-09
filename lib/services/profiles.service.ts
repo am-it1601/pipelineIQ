@@ -1,5 +1,5 @@
+import type { UpworkProfile } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { UpworkProfile } from "@/lib/types";
 
 // ============================================================
 // MAPPER
@@ -11,7 +11,7 @@ import type { UpworkProfile } from "@/lib/types";
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapRowToProfile(row: Record<string, any>): UpworkProfile {
-  return { ...row, status: row.status ?? 'active' } as UpworkProfile;
+  return { ...row, status: row.status ?? "active" } as UpworkProfile;
 }
 
 // ============================================================
@@ -32,7 +32,7 @@ export async function getProfiles(
 ): Promise<UpworkProfile[]> {
   let query = supabase
     .from("upwork_profiles")
-    .select("id, profile_name, profile_link, status, focus_area, skill_tags")
+    .select("id, profile_name, profile_link, focus_area, skill_tags, status")
     .order("profile_name", { ascending: true });
 
   if (options.active !== undefined) {
@@ -40,23 +40,15 @@ export async function getProfiles(
   }
 
   const { data, error } = await query;
-  if (error)
-    throw new Error(`Failed to fetch Upwork profiles: ${error.message}`);
+  if (error) throw new Error(`Failed to fetch Upwork profiles: ${error.message}`);
   return (data ?? []).map(mapRowToProfile);
 }
 
 /**
  * Fetches a single Upwork profile by ID. Throws if not found.
  */
-export async function getProfileById(
-  supabase: SupabaseClient,
-  id: string
-): Promise<UpworkProfile> {
-  const { data, error } = await supabase
-    .from("upwork_profiles")
-    .select("*")
-    .eq("id", id)
-    .single();
+export async function getProfileById(supabase: SupabaseClient, id: string): Promise<UpworkProfile> {
+  const { data, error } = await supabase.from("upwork_profiles").select("*").eq("id", id).single();
 
   if (error || !data) throw new Error("Profile not found");
   return mapRowToProfile(data);
@@ -89,8 +81,7 @@ export async function createProfileRecord(
     .select()
     .single();
 
-  if (error || !row)
-    throw new Error(`Failed to create profile: ${error?.message}`);
+  if (error || !row) throw new Error(`Failed to create profile: ${error?.message}`);
   return mapRowToProfile(row);
 }
 
@@ -131,13 +122,7 @@ export async function updateProfileRecord(
 /**
  * Deletes an Upwork profile by ID.
  */
-export async function deleteProfileRecord(
-  supabase: SupabaseClient,
-  id: string
-): Promise<void> {
-  const { error } = await supabase
-    .from("upwork_profiles")
-    .delete()
-    .eq("id", id);
+export async function deleteProfileRecord(supabase: SupabaseClient, id: string): Promise<void> {
+  const { error } = await supabase.from("upwork_profiles").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete profile: ${error.message}`);
 }

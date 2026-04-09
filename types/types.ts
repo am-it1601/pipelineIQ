@@ -1,4 +1,4 @@
-import { Database } from '@/lib/supabase/database.types';
+import { Database } from "@/types/database.types";
 
 // ============================================================
 // USER & AUTH TYPES
@@ -6,7 +6,7 @@ import { Database } from '@/lib/supabase/database.types';
 
 export type UserRole = "admin" | "bd";
 
-export type User = Database['public']['Tables']['profiles']['Row'] & {
+export type User = Database["public"]["Tables"]["profiles"]["Row"] & {
   role: UserRole;
 };
 
@@ -14,12 +14,12 @@ export type User = Database['public']['Tables']['profiles']['Row'] & {
 // INVITATION TYPES
 // ============================================================
 
-export type InvitationRole = 'admin' | 'bd_member';
-export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+export type InvitationRole = "admin" | "bd_member";
+export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";
 
-export type RawInvitation = Database['public']['Tables']['invitations']['Row'];
+export type RawInvitation = Database["public"]["Tables"]["invitations"]["Row"];
 
-export interface Invitation extends Omit<RawInvitation, 'role' | 'status' | 'invited_by'> {
+export interface Invitation extends Omit<RawInvitation, "role" | "status" | "invited_by"> {
   role: InvitationRole;
   status: InvitationStatus;
   /** Joined from profiles — name of the admin who sent the invite */
@@ -33,7 +33,7 @@ export interface Invitation extends Omit<RawInvitation, 'role' | 'status' | 'inv
 // APP SETTINGS TYPES
 // ============================================================
 
-export type AppSetting = Database['public']['Tables']['app_settings']['Row'];
+export type AppSetting = Database["public"]["Tables"]["app_settings"]["Row"];
 
 // ============================================================
 // BD MEMBER TYPES
@@ -41,7 +41,7 @@ export type AppSetting = Database['public']['Tables']['app_settings']['Row'];
 
 export type MemberStatus = "active" | "inactive";
 
-export type OmittedBDMember = Omit<Database['public']['Tables']['bd_members']['Row'], 'status'>;
+export type OmittedBDMember = Omit<Database["public"]["Tables"]["bd_members"]["Row"], "status">;
 export interface BDMember extends OmittedBDMember {
   status: MemberStatus;
 }
@@ -52,7 +52,10 @@ export interface BDMember extends OmittedBDMember {
 
 export type ProfileStatus = "active" | "inactive";
 
-export type OmittedUpworkProfile = Omit<Database['public']['Tables']['upwork_profiles']['Row'], 'status'>;
+export type OmittedUpworkProfile = Omit<
+  Database["public"]["Tables"]["upwork_profiles"]["Row"],
+  "status"
+>;
 export interface UpworkProfile extends OmittedUpworkProfile {
   status: ProfileStatus;
 }
@@ -75,9 +78,12 @@ export type LeadStatus =
 
 // We extract and augment the raw DB row just to provide stricter string literal types
 // instead of just `string`.
-export type RawLeadLogEntry = Database['public']['Tables']['lead_logs']['Row'];
+export type RawLeadLogEntry = Database["public"]["Tables"]["lead_logs"]["Row"];
 
-export interface LeadLogEntry extends Omit<RawLeadLogEntry, 'lead_source' | 'engagement_type' | 'bid_type' | 'status'> {
+export interface LeadLogEntry extends Omit<
+  RawLeadLogEntry,
+  "lead_source" | "engagement_type" | "bid_type" | "status"
+> {
   lead_source: LeadSource;
   engagement_type: EngagementType;
   bid_type: BidType;
@@ -85,7 +91,7 @@ export interface LeadLogEntry extends Omit<RawLeadLogEntry, 'lead_source' | 'eng
   assignee?: { full_name: string; avatar_initials: string } | null;
 }
 
-export type NewLeadEntry = Database['public']['Tables']['lead_logs']['Insert'];
+export type NewLeadEntry = Database["public"]["Tables"]["lead_logs"]["Insert"];
 
 // ============================================================
 // KPI METRIC TYPES
@@ -219,3 +225,7 @@ export type LeadFilter = {
   assigned_to_id: String;
   lead_source: String;
 };
+
+// ============================================================
+// USER MANAGEMENT
+// ============================================================

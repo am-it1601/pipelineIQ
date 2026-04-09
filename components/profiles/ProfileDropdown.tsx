@@ -1,8 +1,8 @@
-'use client'
-import { getUpworkProfiles } from '@/lib/actions/user.actions';
-import { UpworkProfile } from '@/lib/types';
-import { useEffect, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+"use client";
+import { getUpworkProfiles } from "@/lib/actions_old/profile.action";
+import { UpworkProfile } from "@/types/types";
+import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 type ProfileDropdownProps = {
   onChangeHandler: (value: string) => void;
@@ -11,7 +11,6 @@ type ProfileDropdownProps = {
 };
 
 const ProfileDropdown = ({ onChangeHandler, value, disabled }: ProfileDropdownProps) => {
-
   const [profiles, setProfiles] = useState<UpworkProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,12 +27,13 @@ const ProfileDropdown = ({ onChangeHandler, value, disabled }: ProfileDropdownPr
       }
     };
     loadProfiles();
-
-  }, [])
+  }, []);
 
   return (
-    <Select onValueChange={onChangeHandler} value={value || ''} disabled={loading || disabled}>
-      <SelectTrigger><SelectValue placeholder={loading ? "Loading profiles..." : "Select profile"} /></SelectTrigger>
+    <Select onValueChange={onChangeHandler} value={value || ""} disabled={loading || disabled}>
+      <SelectTrigger>
+        <SelectValue placeholder={loading ? "Loading profiles..." : "Select profile"} />
+      </SelectTrigger>
       <SelectContent>
         {profiles.map((profile) => (
           <SelectItem key={profile.id} value={profile.id}>
@@ -42,6 +42,6 @@ const ProfileDropdown = ({ onChangeHandler, value, disabled }: ProfileDropdownPr
         ))}
       </SelectContent>
     </Select>
-  )
-}
-export default ProfileDropdown
+  );
+};
+export default ProfileDropdown;

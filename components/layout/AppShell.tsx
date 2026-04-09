@@ -9,7 +9,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset className="flex flex-col min-h-0">
         <Topbar />
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 lg:px-8 py-3">{children}</div>
+        <div className="content-area-scroll">
+          <div className="content-area-container">{children}</div>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

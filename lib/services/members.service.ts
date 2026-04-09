@@ -1,4 +1,4 @@
-import type { BDMember } from "@/lib/types";
+import type { BDMember } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // ============================================================
@@ -10,26 +10,19 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Used by both Server Actions and API Routes.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapRowToMember(row: Record<string, any>): BDMember {
-  return { ...row, status: row.status ?? "active" } as BDMember;
-}
 
 // ============================================================
 // SERVICE FUNCTIONS
 // ============================================================
 
-export interface GetMembersOptions {
-  /** Filter by active/inactive status. Omit to return all. */
-  active?: boolean;
+export function mapRowToMember(row: Record<string, any>): BDMember {
+  return { ...row, status: row.status ?? "active" } as BDMember;
 }
 
 /**
  * Returns a list of BD members (role = 'bd').
  */
-export async function getMembers(
-  supabase: SupabaseClient,
-  options: GetMembersOptions = {}
-): Promise<BDMember[]> {
+export async function getMembers(supabase: SupabaseClient, options: any = {}): Promise<BDMember[]> {
   let query = supabase
     .from("bd_members")
     .select(

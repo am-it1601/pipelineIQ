@@ -1,43 +1,35 @@
-'use client';
+"use client";
 
-import type { InvitationStatus } from '@/lib/types';
-import { Loader2, Send, Undo } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
+import type { InvitationStatus } from "@/types/types";
+import { Loader2, Send, Undo } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface InvitationActionsProps {
   invitationId: string;
   status: InvitationStatus;
 }
 
-export default function InvitationActions({
-  invitationId,
-  status,
-}: InvitationActionsProps) {
+export default function InvitationActions({ invitationId, status }: InvitationActionsProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const canResend = status === 'pending' || status === 'expired';
-  const canRevoke = status === 'pending';
+  const canResend = status === "pending" || status === "expired";
+  const canRevoke = status === "pending";
 
-  if (status === 'accepted' || status === 'revoked') {
+  if (status === "accepted" || status === "revoked") {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
 
-  const handleAction = (action: 'resend' | 'revoke') => {
+  const handleAction = (action: "resend" | "revoke") => {
     startTransition(async () => {
       try {
         const res = await fetch(`/api/invitations/${invitationId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action }),
         });
 
@@ -49,9 +41,7 @@ export default function InvitationActions({
         }
 
         toast.success(
-          action === 'resend'
-            ? 'Invitation resent successfully'
-            : 'Invitation revoked successfully'
+          action === "resend" ? "Invitation resent successfully" : "Invitation revoked successfully"
         );
         router.refresh();
       } catch {
@@ -72,7 +62,7 @@ export default function InvitationActions({
                   size="icon"
                   className="h-8 w-8 p-0 text-primary"
                   disabled={isPending}
-                  onClick={() => handleAction('resend')}
+                  onClick={() => handleAction("resend")}
                 >
                   {isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -95,7 +85,7 @@ export default function InvitationActions({
                   size="icon"
                   className="h-8 w-8 p-0 text-destructive"
                   disabled={isPending}
-                  onClick={() => handleAction('revoke')}
+                  onClick={() => handleAction("revoke")}
                 >
                   {isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

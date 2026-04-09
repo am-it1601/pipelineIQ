@@ -1,5 +1,5 @@
+import type { LeadLogEntry } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { LeadLogEntry } from "@/lib/types";
 
 // ============================================================
 // SHARED TYPES
@@ -52,23 +52,16 @@ export const LEAD_SORT_FIELD_MAP: Record<string, string> = {
  * Returns the augmented query — chainable.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyLeadFilters(
-  query: any,
-  filters?: LeadFiltersInput
-): any {
+function applyLeadFilters(query: any, filters?: LeadFiltersInput): any {
   if (!filters) return query;
-  if (filters.status) query = query.eq("status", filters.status) ;
-  if (filters.source) query = query.eq("lead_source", filters.source) ;
-  if (filters.engagement)
-    query = query.eq("engagement_type", filters.engagement) ;
-  if (filters.bid_type) query = query.eq("bid_type", filters.bid_type) ;
-  if (filters.profile)
-    query = query.eq("profile_used_id", filters.profile) ;
-  if (filters.member)
-    query = query.eq("assigned_to_id", filters.member) ;
-  if (filters.hot) query = query.eq("is_hot", true) ;
-  if (filters.search)
-    query = query.ilike("project_title", `%${filters.search}%`) ;
+  if (filters.status) query = query.eq("status", filters.status);
+  if (filters.source) query = query.eq("lead_source", filters.source);
+  if (filters.engagement) query = query.eq("engagement_type", filters.engagement);
+  if (filters.bid_type) query = query.eq("bid_type", filters.bid_type);
+  if (filters.profile) query = query.eq("profile_used_id", filters.profile);
+  if (filters.member) query = query.eq("assigned_to_id", filters.member);
+  if (filters.hot) query = query.eq("is_hot", true);
+  if (filters.search) query = query.ilike("project_title", `%${filters.search}%`);
   return query;
 }
 
@@ -92,31 +85,24 @@ export async function queryLeads(
   supabase: SupabaseClient,
   options: QueryLeadsOptions = {}
 ): Promise<PaginatedLeadsResponse> {
-  const {
-    page = 1,
-    pageSize = 20,
-    filters,
-    sortBy = "created_at",
-    sortDir = "desc",
-  } = options;
+  const { page = 1, pageSize = 20, filters, sortBy = "created_at", sortDir = "desc" } = options;
 
   const offset = (page - 1) * pageSize;
   const dbSortField = LEAD_SORT_FIELD_MAP[sortBy] ?? "created_at";
 
   // Count query
-  let countQuery = supabase
-    .from("lead_logs")
-    .select("*", { count: "exact", head: true });
+  let countQuery = supabase.from("lead_logs").select("*", { count: "exact", head: true });
   countQuery = applyLeadFilters(countQuery, filters);
   const { count, error: countError } = await countQuery;
-  if (countError)
-    throw new Error(`Failed to fetch leads count: ${countError.message}`);
+  if (countError) throw new Error(`Failed to fetch leads count: ${countError.message}`);
 
   const total = count ?? 0;
   const totalPages = Math.ceil(total / pageSize);
 
   // Data query
-  let dataQuery = supabase.from("lead_logs").select("*, assignee:profiles(full_name, avatar_initials)");
+  let dataQuery = supabase
+    .from("lead_logs")
+    .select("*, assignee:profiles(full_name, avatar_initials)");
   dataQuery = applyLeadFilters(dataQuery, filters);
   dataQuery = dataQuery
     .order(dbSortField, { ascending: sortDir === "asc" })
@@ -138,10 +124,7 @@ export async function queryLeads(
   };
 }
 
-export async function getLeadById(
-  supabase: SupabaseClient,
-  id: string
-): Promise<LeadLogEntry> {
+export async function getLeadById(supabase: SupabaseClient, id: string): Promise<LeadLogEntry> {
   const { data, error } = await supabase
     .from("lead_logs")
     .select("*, assignee:profiles(full_name, avatar_initials)")
@@ -185,8 +168,7 @@ export async function createLeadRecord(
     .select("*, assignee:profiles(full_name, avatar_initials)")
     .single();
 
-  if (error || !row)
-    throw new Error(`Failed to create lead: ${error?.message}`);
+  if (error || !row) throw new Error(`Failed to create lead: ${error?.message}`);
   return row as unknown as LeadLogEntry;
 }
 
@@ -200,7 +182,7 @@ export async function updateLeadRecord(
 ): Promise<LeadLogEntry> {
   const dbPatch = {
     ...patch,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
 
   const { data, error } = await supabase
@@ -217,10 +199,7 @@ export async function updateLeadRecord(
 /**
  * Deletes a lead by ID.
  */
-export async function deleteLeadRecord(
-  supabase: SupabaseClient,
-  id: string
-): Promise<void> {
+export async function deleteLeadRecord(supabase: SupabaseClient, id: string): Promise<void> {
   const { error } = await supabase.from("lead_logs").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete lead: ${error.message}`);
 }

@@ -1,4 +1,4 @@
-import { UserRole } from "@/lib/types";
+import { UserRole } from "@/types/types";
 import { z } from "zod";
 
 // Zod validation schema

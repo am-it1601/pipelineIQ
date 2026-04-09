@@ -1,4 +1,4 @@
-import type { Invitation, InvitationRole } from "@/lib/types";
+import type { Invitation, InvitationRole } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getInvitationExpiryDays } from "./app-settings.service";
 

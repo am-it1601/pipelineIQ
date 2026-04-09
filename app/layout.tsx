@@ -4,14 +4,14 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import SupabaseAuthProvider from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { Geist, IBM_Plex_Mono, Noto_Serif } from "next/font/google";
+import { Familjen_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
-const fontSerif = Noto_Serif({
+const fontSerif = Familjen_Grotesk({
   subsets: ["latin"],
   variable: "--font-serif",
 });
@@ -19,7 +19,7 @@ const fontSerif = Noto_Serif({
 const fontMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: "100"
+  weight: "100",
 });
 
 export const metadata: Metadata = {
@@ -34,13 +34,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased overflow-x-hidden`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body
+        className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased overflow-x-hidden`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseAuthProvider>
             {children}
             <Toaster richColors />

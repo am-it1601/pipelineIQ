@@ -1,6 +1,7 @@
-'use client';
-import { create } from 'zustand';
-import type { User } from '@/lib/types';
+"use client";
+
+import { User } from "@supabase/supabase-js";
+import { create } from "zustand";
 
 interface AuthState {
   currentUser: User | null;

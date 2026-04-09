@@ -2,37 +2,40 @@ import { BID_TYPES, ENGAGEMENT_TYPES, LEAD_SOURCES } from "@/lib/constants";
 import { z } from "zod";
 
 const leadSourceSchema = z.enum(LEAD_SOURCES, {
-   message: "Please select a valid lead source." });
+  message: "Please select a valid lead source.",
+});
 
-const engagementTypeSchema = z.enum(ENGAGEMENT_TYPES, { message: "Please select a valid engagement type." });
+const engagementTypeSchema = z.enum(ENGAGEMENT_TYPES, {
+  message: "Please select a valid engagement type.",
+});
 
 const bidTypeSchema = z.enum(BID_TYPES, { message: "Please select a valid bid type." });
 
-const upworkUrlSchema = z
+export const upworkUrlSchema = z
   .string()
   .trim()
   .url("Please enter a valid URL.")
   .refine((value) => {
     try {
       const url = new URL(value);
-      return (
-        url.hostname === "upwork.com" ||
-        url.hostname === "www.upwork.com"
-      );
+      return url.hostname === "upwork.com" || url.hostname === "www.upwork.com";
     } catch {
       return false;
     }
   }, "Only upwork.com links are allowed.");
 
-const numberFromInput = z.preprocess((value) => {
-  if (value === "" || value === null || value === undefined) return undefined;
-  if (typeof value === "string") return Number(value);
-  return value;
-}, z.number({
-    error: "Please enter a valid number."
-}));
+const numberFromInput = z.preprocess(
+  (value) => {
+    if (value === "" || value === null || value === undefined) return undefined;
+    if (typeof value === "string") return Number(value);
+    return value;
+  },
+  z.number({
+    error: "Please enter a valid number.",
+  })
+);
 
-const optionalNumberFromInput = z.preprocess((value) => {
+export const optionalNumberFromInput = z.preprocess((value) => {
   if (value === "" || value === null || value === undefined) return undefined;
   if (typeof value === "string") return Number(value);
   return value;
@@ -81,9 +84,7 @@ export const leadFormSchema = z
       .max(2000, "Remarks must be 2000 characters or less.")
       .optional(),
 
-    assigned_to_id: z
-      .string()
-      .min(1, "Please assign this lead to a member."),
+    assigned_to_id: z.string().min(1, "Please assign this lead to a member."),
   })
   .superRefine((data, ctx) => {
     const isUpwork = data.lead_source === "Upwork";
@@ -180,7 +181,6 @@ export const leadFormSchema = z
       }
     }
   });
-
 
 export type LeadFormInput = z.input<typeof leadFormSchema>;
 export type LeadFormValues = z.output<typeof leadFormSchema>;

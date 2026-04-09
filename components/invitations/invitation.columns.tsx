@@ -1,4 +1,4 @@
-import type { Invitation, InvitationStatus } from "@/lib/types";
+import type { Invitation, InvitationStatus } from "@/types/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Mail } from "lucide-react";
 import DateDisplay from "../DateDisplay";
