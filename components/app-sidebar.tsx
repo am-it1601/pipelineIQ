@@ -18,9 +18,7 @@ import {
 import {
   ChartPieIcon,
   FlagIcon,
-  FunnelIcon,
   LayoutDashboardIcon,
-  Table2Icon,
   TagIcon,
   TerminalIcon,
   Users2Icon,
@@ -34,26 +32,26 @@ const data = {
       icon: <LayoutDashboardIcon />,
       isActive: true,
     },
-    {
-      title: "Leads",
-      icon: <FunnelIcon />,
-      items: [
-        {
-          title: "Hot Leads",
-          url: "/leads",
-          icon: <Table2Icon />,
-        },
+    // {
+    //   title: "Leads",
+    //   icon: <FunnelIcon />,
+    //   items: [
+    //     {
+    //       title: "Hot Leads",
+    //       url: "/leads",
+    //       icon: <Table2Icon />,
+    //     },
 
-        {
-          title: "Leads Log Entry",
-          url: "/leads",
-          icon: <Table2Icon />,
-        },
-      ],
-    },
+    //     {
+    //       title: "Leads Log Entry",
+    //       url: "/leads",
+    //       icon: <Table2Icon />,
+    //     },
+    //   ],
+    // },
     {
-      title: "Team Roaster",
-      url: "/roaster",
+      title: "Users & Access Control",
+      url: "/users",
       icon: <Users2Icon />,
     },
     {

@@ -1,26 +1,16 @@
 // For adding custom fonts with other frameworks, see:
 // https://tailwindcss.com/docs/font-family
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import QueryProvider from "@/components/providers/QueryProvider";
 import SupabaseAuthProvider from "@/components/providers/SupabaseAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { Familjen_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
+import { Manrope, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-const fontSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
 
-const fontSerif = Familjen_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
+const fontSans = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
-const fontMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: "100",
-});
+const fontHeading = Source_Sans_3({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -33,14 +23,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased overflow-x-hidden`}
-      >
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={fontSans.variable + " " + fontHeading.variable}
+    >
+      <body className="antialiased overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseAuthProvider>
-            {children}
-            <Toaster richColors />
+            <QueryProvider>
+              {children}
+              <Toaster richColors />
+            </QueryProvider>
           </SupabaseAuthProvider>
         </ThemeProvider>
       </body>

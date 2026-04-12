@@ -20,8 +20,8 @@ const Datatable = ({ columns, data, emptyTitle, emptyDescription }: DataTablePro
   });
 
   return (
-    <Table className="border-y">
-      <TableHeader className="bg-accent">
+    <Table>
+      <TableHeader className="bg-sidebar-accent">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="text-sm">
             {headerGroup.headers.map((header) => {

@@ -52,6 +52,7 @@ const InvitationForm = ({
                   type="text"
                   placeholder="Enter email address"
                   aria-invalid={fieldState.invalid}
+                  className="cn-input"
                 />
 
                 {errors.email && <FieldError>{errors.email.message}</FieldError>}

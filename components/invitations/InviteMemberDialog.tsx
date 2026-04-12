@@ -121,12 +121,10 @@ export function InviteMemberDialog({ onInviteSent }: InviteMemberDialogProps) {
         <DialogHeader className="pt-2">
           <DialogTitle className="flex items-center gap-2">
             <Mails className="size-5 text-primary" />
-            Invite a Team Member
+            Invite Team
           </DialogTitle>
           <DialogDescription>
-            <p className="whitespace-pre-wrap">
-              Send an invitation email to add a new member to your team.
-            </p>
+            <p className="whitespace-pre-wrap">Add members to your workspace</p>
             <Separator className="my-1 h-px" />
           </DialogDescription>
         </DialogHeader>
