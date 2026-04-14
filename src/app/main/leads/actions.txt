@@ -1,0 +1,227 @@
+// 'use server';
+
+// import { createClient } from '@/lib/supabase/server';
+// import { createAdminClient } from '@/lib/supabase/admin';
+// import type { BDMember, LeadLogEntry, UpworkProfile } from '@/lib/types';
+
+// const ADMIN_ROLE = 'admin';
+
+// interface FetchLeadsOptions {
+//   search?: string;
+//   status?: string;
+//   source?: string;
+//   member?: string;
+//   engagement?: string;
+//   bid_type?: string;
+//   profile?: string;
+//   hot?: boolean;
+//   sortBy?: string;
+//   sortDir?: 'asc' | 'desc';
+//   page?: number;
+//   pageSize?: number;
+// }
+
+// /**
+//  * Convert database row to LeadLogEntry using same mapping as API
+//  */
+// function mapRowToLead(row: any): LeadLogEntry {
+//   return {
+//     id: row.id,
+//     date: row.date,
+//     project_title: row.project_title,
+//     lead_source: row.lead_source,
+//     upwork_link: row.upwork_link,
+//     profile_used_id: row.profile_used_id,
+//     assigned_to_id: row.assigned_to_id,
+//     engagement_type: row.engagement_type,
+//     proposal_value: row.proposal_value,
+//     hourly_rate: row.hourly_rate,
+//     estimated_hours: row.estimated_hours,
+//     connects_used: row.connects_used,
+//     bid_type: row.bid_type,
+//     status: row.status,
+//     remarks: row.remarks,
+//     is_hot: row.is_hot,
+//     created_by_user_id: row.created_by_user_id,
+//     updated_by_user_id: row.updated_by_user_id,
+//     created_at: row.created_at,
+//     updated_at: row.updated_at,
+//   };
+// }
+
+// /**
+//  * Fetch leads from database with filtering and pagination
+//  */
+// export async function fetchLeads(options: FetchLeadsOptions = {}) {
+//   try {
+//     const supabase = await createClient();
+
+//     // Get current user
+//     const {
+//       data: { user },
+//     } = await supabase.auth.getUser();
+
+//     if (!user?.id) {
+//       throw new Error('Unauthorized');
+//     }
+
+//     const {
+//       search = '',
+//       status = '',
+//       source = '',
+//       member = '',
+//       engagement = '',
+//       bid_type = '',
+//       profile = '',
+//       hot = false,
+//       sortBy = 'date',
+//       sortDir = 'desc',
+//       page = 1,
+//       pageSize = 20,
+//     } = options;
+
+//     // Get current user role
+//     const { data: userData } = await supabase
+//       .from('bd_members')
+//       .select('role')
+//       .eq('user_id', user.id)
+//       .single();
+
+//     const isAdmin = userData?.role === ADMIN_ROLE;
+
+//     // Build query using admin client for full access
+//     const admin = createAdminClient();
+//     let query = admin.from('lead_logs').select('*', { count: 'exact' });
+
+//     // Filters
+//     if (search) {
+//       query = query.or(
+//         `project_title.ilike.%${search}%,remarks.ilike.%${search}%`
+//       );
+//     }
+
+//     if (status && status !== 'all') query = query.eq('status', status);
+//     if (source && source !== 'all') query = query.eq('lead_source', source);
+//     if (engagement && engagement !== 'all') query = query.eq('engagement_type', engagement);
+//     if (bid_type && bid_type !== 'all') query = query.eq('bid_type', bid_type);
+//     if (profile && profile !== 'all') query = query.eq('profile_used_id', profile);
+//     if (hot) query = query.eq('is_hot', true);
+
+//     // Scope to BD member
+//     if (!isAdmin && member) {
+//       query = query.eq('assigned_to_id', member);
+//     } else if (!isAdmin) {
+//       // Non-admin: only show their own leads
+//       query = query.eq('assigned_to_id', user.id);
+//     } else if (member && member !== 'all') {
+//       // Admin: filter by specific member if provided
+//       query = query.eq('assigned_to_id', member);
+//     }
+
+//     // Sorting
+//     const sortField = sortBy === 'created_at' ? 'created_at' : sortBy || 'date';
+//     query = query.order(sortField, { ascending: sortDir === 'asc' });
+
+//     // Pagination
+//     const offset = (page - 1) * pageSize;
+//     query = query.range(offset, offset + pageSize - 1);
+
+//     const { data, count, error } = await query;
+
+//     if (error) throw error;
+
+//     const leads = (data || []).map(mapRowToLead);
+//     const total = count || 0;
+//     const totalPages = Math.ceil(total / pageSize);
+
+//     return {
+//       data: leads,
+//       pagination: {
+//         total,
+//         page,
+//         pageSize,
+//         totalPages,
+//       },
+//     };
+//   } catch (error) {
+//     console.error('Error fetching leads:', error);
+//     throw error;
+//   }
+// }
+
+// /**
+//  * Fetch BD members for filter dropdown
+//  */
+// export async function fetchMembers(): Promise<BDMember[]> {
+//   try {
+//     const supabase = await createClient();
+
+//     const {
+//       data: { user },
+//     } = await supabase.auth.getUser();
+
+//     if (!user?.id) {
+//       throw new Error('Unauthorized');
+//     }
+
+//     const { data, error } = await supabase
+//       .from('bd_members')
+//       .select('id, name, email, status, monthly_target, incentive_eligible, join_date')
+//       .order('name');
+
+//     if (error) throw error;
+
+//     return (
+//       data?.map(d => ({
+//         id: d.id,
+//         name: d.name,
+//         email: d.email,
+//         status: d.status,
+//         monthly_target: d.monthly_target,
+//         incentive_eligible: d.incentive_eligible,
+//         join_date: d.join_date,
+//       })) || []
+//     );
+//   } catch (error) {
+//     console.error('Error fetching members:', error);
+//     return [];
+//   }
+// }
+
+// /**
+//  * Fetch Upwork profiles for filter dropdown
+//  */
+// export async function fetchProfiles(): Promise<UpworkProfile[]> {
+//   try {
+//     const supabase = await createClient();
+
+//     const {
+//       data: { user },
+//     } = await supabase.auth.getUser();
+
+//     if (!user?.id) {
+//       throw new Error('Unauthorized');
+//     }
+
+//     const { data, error } = await supabase
+//       .from('upwork_profiles')
+//       .select('id, profile_name, profile_link, status, focus_area, skill_tags')
+//       .order('profile_name');
+
+//     if (error) throw error;
+
+//     return (
+//       data?.map(d => ({
+//         id: d.id,
+//         profile_name: d.profile_name,
+//         profile_link: d.profile_link,
+//         status: d.status,
+//         focus_area: d.focus_area,
+//         skill_tags: d.skill_tags,
+//       })) || []
+//     );
+//   } catch (error) {
+//     console.error('Error fetching profiles:', error);
+//     return [];
+//   }
+// }
