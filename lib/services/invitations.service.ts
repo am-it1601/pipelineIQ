@@ -1,3 +1,9 @@
+/**
+ * @deprecated This service is deprecated. Use `lib/auth/services/admin-user.service.ts` instead.
+ * Invitations are now managed via the `public.users` table (status='invited').
+ * This file is retained for reference only and should not receive new writes.
+ */
+
 import type { Invitation, InvitationRole } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getInvitationExpiryDays } from "./app-settings.service";

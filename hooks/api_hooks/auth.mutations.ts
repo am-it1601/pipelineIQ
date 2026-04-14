@@ -89,15 +89,47 @@ export function useUnenrollMfa() {
 // ============================================================
 
 /**
- * POST /api/auth/users — Invite a new user
+ * POST /api/users — Invite a new user
  */
 export function useInviteUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: { email: string; groupSlug: string; fullName?: string }) =>
-      authMutate<{ userId: string }>('/api/auth/users', { body: input }),
+      authMutate<{ userId: string }>('/api/users', { body: input }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.users() });
+      queryClient.invalidateQueries({ queryKey: authKeys.invitations() });
+    },
+  });
+}
+
+/**
+ * POST /api/users/invitations/:id — Resend invitation
+ */
+export function useResendInvitation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) =>
+      authMutate(`/api/users/invitations/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.invitations() });
+    },
+  });
+}
+
+/**
+ * DELETE /api/users/invitations/:id — Revoke invitation (hard delete)
+ */
+export function useRevokeInvitation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) =>
+      authMutate(`/api/users/invitations/${userId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.invitations() });
       queryClient.invalidateQueries({ queryKey: authKeys.users() });
     },
   });
@@ -117,7 +149,7 @@ export function useUpdateUser() {
       userId: string;
       full_name?: string;
       avatar_initials?: string;
-      status?: 'active' | 'inactive' | 'suspended';
+      status?: 'invited' | 'active' | 'suspended';
       groupSlugs?: string[];
     }) => authMutate(`/api/auth/users/${userId}`, { method: 'PATCH', body: data }),
     onSuccess: (_data, variables) => {

@@ -5,14 +5,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
-import { Moon, Sun } from "lucide-react";
+import { LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -71,14 +73,40 @@ export default function Topbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div
-            className={cn(
-              "topbar__avatar",
-              currentUser?.role === "admin" ? "topbar__avatar--admin" : "topbar__avatar--default"
-            )}
-          >
-            {currentUser?.avatar_initials}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Avatar>
+                <AvatarFallback>{currentUser?.avatar_initials}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80">
+              <div className="p-2 flex gap-2 items-center whitespace-pre-wrap">
+                <Avatar>
+                  <AvatarFallback>{currentUser?.avatar_initials}</AvatarFallback>
+                </Avatar>
+                <div className="text-sm font-semibold font-heading">
+                  {currentUser?.user_metadata.full_name}
+                  <p className="text-xs font-light text-muted-foreground">{currentUser?.email}</p>
+
+                  <Button variant="link" size="sm" className="px-0">
+                    <Link href="#">My Profile</Link>
+                  </Button>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <Link href="/settings">
+                <DropdownMenuItem closeOnClick>
+                  <Settings className="size-4" />
+                  Account Settings
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive">
+                <LogOut className="size-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

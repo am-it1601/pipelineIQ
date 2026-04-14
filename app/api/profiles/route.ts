@@ -3,10 +3,16 @@ import { createProfileRecord, getProfiles } from "@/lib/services/profiles.servic
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get("status") ?? undefined;
+
     const supabase = createAdminClient();
-    const profiles = await getProfiles(supabase);
+    const active =
+      status === "active" ? true : status === "inactive" ? false : undefined;
+
+    const profiles = await getProfiles(supabase, { active });
     return NextResponse.json(profiles);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

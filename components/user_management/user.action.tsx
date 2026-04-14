@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRecord } from "@/lib/auth/types/auth.types";
+import { UserWithDetails } from "@/lib/auth/types/auth.types";
 import {
   useBanUser,
   useUnbanUser,
@@ -11,12 +11,10 @@ import {
 } from "@/hooks/api_hooks/auth.mutations";
 import {
   BanIcon,
-  CirclePause,
   CirclePlay,
   EllipsisVertical,
   KeyRound,
   Loader2,
-  Play,
   Send,
   ShieldOff,
   TrashIcon,
@@ -32,22 +30,14 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { toast } from "sonner";
-import { useUpdateUser } from "@/hooks/api_hooks/auth.mutations";
 
-const UserActionMenu = ({
-  user,
-  banned,
-}: {
-  user: UserRecord;
-  banned: string | null;
-}) => {
+const UserActionMenu = ({ user }: { user: UserWithDetails }) => {
   const banUser = useBanUser();
   const unbanUser = useUnbanUser();
   const deleteUser = useDeleteUser();
   const sendMagicLink = useSendMagicLink();
   const sendPasswordReset = useSendPasswordReset();
   const resetMfa = useAdminResetUserMfa();
-  const updateUser = useUpdateUser();
 
   const isBusy =
     banUser.isPending ||
@@ -55,28 +45,15 @@ const UserActionMenu = ({
     deleteUser.isPending ||
     sendMagicLink.isPending ||
     sendPasswordReset.isPending ||
-    resetMfa.isPending ||
-    updateUser.isPending;
+    resetMfa.isPending;
 
-  const handleToggleActivation = () => {
-    const newStatus = user.status === "active" ? "inactive" : "active";
-    updateUser.mutate(
-      { userId: user.id, status: newStatus },
-      {
-        onSuccess: () =>
-          toast.success(
-            `User ${newStatus === "active" ? "activated" : "deactivated"} successfully`
-          ),
-        onError: (err) => toast.error(err.message),
-      }
-    );
-  };
+  const isDisabled = user.banned_until != null;
 
-  const handleToggleBan = () => {
-    const action = banned == null ? banUser : unbanUser;
+  const handleToggleDisable = () => {
+    const action = isDisabled ? unbanUser : banUser;
     action.mutate(user.id, {
       onSuccess: () =>
-        toast.success(banned == null ? "User banned" : "User unbanned"),
+        toast.success(isDisabled ? "User enabled" : "User disabled"),
       onError: (err) => toast.error(err.message),
     });
   };
@@ -126,29 +103,16 @@ const UserActionMenu = ({
         {/* Status Management */}
         <DropdownMenuGroup>
           <DropdownMenuLabel>Status</DropdownMenuLabel>
-          <DropdownMenuItem onClick={handleToggleActivation}>
-            {user.status !== "active" ? (
+          <DropdownMenuItem onClick={handleToggleDisable}>
+            {isDisabled ? (
               <>
                 <CirclePlay className="dropdown-menu__icon" />
-                Activate User
+                Enable User
               </>
             ) : (
-              <>
-                <CirclePause className="dropdown-menu__icon" />
-                Deactivate User
-              </>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleToggleBan}>
-            {banned == null ? (
               <>
                 <BanIcon className="dropdown-menu__icon" />
-                Ban User
-              </>
-            ) : (
-              <>
-                <Play className="dropdown-menu__icon" />
-                Unban User
+                Disable User
               </>
             )}
           </DropdownMenuItem>

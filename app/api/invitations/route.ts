@@ -1,3 +1,7 @@
+/**
+ * @deprecated This route is deprecated. Use `/api/users/invitations` instead.
+ * Invitations are now managed via the unified public.users table.
+ */
 import { createInvitation, getInvitations } from "@/lib/services/invitations.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";

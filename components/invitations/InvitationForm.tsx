@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleX, KeyRound, Mail, Send, ShieldUser, UserRound } from "lucide-react";
+import { CircleX, KeyRound, Mail, Send } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
+import GroupSelectDropdown from "@/components/dropdowns/GroupSelectDropdown";
 import { Button } from "../ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel, FieldSet } from "../ui/field";
 import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { InviteFormData, inviteSchema } from "./invitation.form";
 
@@ -21,13 +21,12 @@ const InvitationForm = ({
     handleSubmit,
     reset,
     formState: { errors, isValid },
-    watch,
   } = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
     mode: "onChange",
     defaultValues: {
       email: "",
-      role: "bd",
+      groupSlug: "team_member",
     },
   });
 
@@ -35,7 +34,7 @@ const InvitationForm = ({
     <>
       <form onSubmit={handleSubmit(onInvite)} className="space-y-4">
         <FieldSet>
-          {/* Email  */}
+          {/* Email */}
           <Controller
             name="email"
             control={control}
@@ -54,7 +53,6 @@ const InvitationForm = ({
                   aria-invalid={fieldState.invalid}
                   className="cn-input"
                 />
-
                 {errors.email && <FieldError>{errors.email.message}</FieldError>}
                 <FieldDescription className="field_description">
                   The email address of the person you want to invite.
@@ -62,45 +60,28 @@ const InvitationForm = ({
               </Field>
             )}
           />
-          {/* Role */}
+
+          {/* Group — Dynamic dropdown */}
           <Controller
-            name="role"
+            name="groupSlug"
             control={control}
-            render={({ field, fieldState }) => {
-              return (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="assigned_to_id" className="text-xs font-semibold">
-                    <KeyRound className="w-4 h-4" />
-                    User Role
-                  </FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    aria-invalid={fieldState.invalid}
-                  >
-                    <SelectTrigger id="invite-role">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bd">
-                        <UserRound className="size-4 fill-primary text-primary-foreground hover:fill-none" />
-                        Member
-                      </SelectItem>
-                      <SelectItem value="admin">
-                        <ShieldUser className="size-4 fill-primary text-primary-foreground hover:fill-none" />
-                        Administrator
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.role && <FieldError>{errors.role.message}</FieldError>}
-                  <FieldDescription className="field_description">
-                    {watch("role") === "admin"
-                      ? "Admins have full access to manage the platform."
-                      : "BD Members can manage leads assigned to them."}
-                  </FieldDescription>
-                </Field>
-              );
-            }}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="invite-group" className="text-xs font-semibold">
+                  <KeyRound className="w-4 h-4" />
+                  User Group
+                </FieldLabel>
+                <GroupSelectDropdown
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select a group"
+                />
+                {errors.groupSlug && <FieldError>{errors.groupSlug.message}</FieldError>}
+                <FieldDescription className="field_description">
+                  Determines the permissions the user will have on the platform.
+                </FieldDescription>
+              </Field>
+            )}
           />
         </FieldSet>
         <Separator className="my-1 h-px" />

@@ -10,7 +10,7 @@
 // ============================================================
 
 /** User status in public.users */
-export type UserStatus = 'active' | 'inactive' | 'suspended';
+export type UserStatus = 'invited' | 'active' | 'suspended';
 
 // ============================================================
 // Auth Context Types
@@ -33,23 +33,46 @@ export interface UserRecord {
   status: UserStatus;
   created_at: string;
   updated_at: string;
+
+  // Invitation fields (null for non-invited users)
+  invited_by: string | null;
+  invited_at: string | null;
+  invitation_expires_at: string | null;
+  invitation_accepted_at: string | null;
+  invitation_resent_count: number;
 }
 
-/** Full user details enriched with auth data and group/permission info */
+/** Full user details — flat, consumer-friendly shape */
 export interface UserWithDetails {
-  user: UserRecord;
+  // Identity (from public.users)
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_initials: string;
+  status: UserStatus;
+  created_at: string;
+  updated_at: string;
+
+  // Invitation (from public.users — nullable for non-invited users)
+  invited_by: string | null;
+  invited_at: string | null;
+  invitation_expires_at: string | null;
+  invitation_accepted_at: string | null;
+  invitation_resent_count: number;
+
+  // Auth session info (from auth.users — only populated for detail view)
+  email_confirmed_at: string | null;
+  last_sign_in_at: string | null;
+  banned_until: string | null;
+  auth_created_at: string;
+
+  // Groups & permissions (from DB lookups)
   groups: GroupInfo[];
   permissions: string[];
-  auth: {
-    email_confirmed_at: string | null;
-    last_sign_in_at: string | null;
-    banned_until: string | null;
-    created_at: string;
-  };
-  mfa: {
-    enabled: boolean;
-    factorCount: number;
-  };
+
+  // MFA
+  mfa_enabled: boolean;
+  mfa_factor_count: number;
 }
 
 /** Group summary info */

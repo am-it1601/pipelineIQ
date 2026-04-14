@@ -18,10 +18,10 @@ import {
   verifyUserEmail as verifyUserEmailService,
   sendPasswordResetLink as sendPasswordResetLinkService,
   sendMagicLink as sendMagicLinkService,
+  resendInvitation as resendInvitationService,
+  revokeInvitation as revokeInvitationService,
 } from '../services/admin-user.service';
 import {
-  deactivateUser as deactivateUserService,
-  activateUser as activateUserService,
   updateUserGroups as updateUserGroupsService,
 } from '../services/user.service';
 import {
@@ -56,12 +56,45 @@ export async function inviteUser(input: {
   fullName?: string;
 }): Promise<ActionResult<{ userId: string }>> {
   try {
-    await requirePermission('users:invite');
+    const context = await requirePermission('users:invite');
     const validated = inviteUserSchema.parse(input);
-    const result = await inviteUserService(validated);
+    const result = await inviteUserService({
+      ...validated,
+      invitedBy: context.userId,
+    });
     return { success: true, data: result };
   } catch (error) {
     return handleError(error, 'Failed to invite user');
+  }
+}
+
+/**
+ * Resend an invitation.
+ * Requires: users:invite
+ */
+export async function resendInvitation(userId: string): Promise<ActionResult<void>> {
+  try {
+    await requirePermission('users:invite');
+    const { id } = userIdParamSchema.parse({ id: userId });
+    await resendInvitationService(id);
+    return { success: true, data: undefined };
+  } catch (error) {
+    return handleError(error, 'Failed to resend invitation');
+  }
+}
+
+/**
+ * Revoke an invitation (hard delete).
+ * Requires: users:delete
+ */
+export async function revokeInvitation(userId: string): Promise<ActionResult<void>> {
+  try {
+    await requirePermission('users:delete');
+    const { id } = userIdParamSchema.parse({ id: userId });
+    await revokeInvitationService(id);
+    return { success: true, data: undefined };
+  } catch (error) {
+    return handleError(error, 'Failed to revoke invitation');
   }
 }
 
@@ -144,35 +177,7 @@ export async function updateUserGroups(
   }
 }
 
-/**
- * Deactivate a user (set status to 'inactive').
- * Requires: users:update
- */
-export async function deactivateUser(userId: string): Promise<ActionResult<void>> {
-  try {
-    await requirePermission('users:update');
-    const { id } = userIdParamSchema.parse({ id: userId });
-    await deactivateUserService(id);
-    return { success: true, data: undefined };
-  } catch (error) {
-    return handleError(error, 'Failed to deactivate user');
-  }
-}
 
-/**
- * Activate a user (set status to 'active').
- * Requires: users:update
- */
-export async function activateUser(userId: string): Promise<ActionResult<void>> {
-  try {
-    await requirePermission('users:update');
-    const { id } = userIdParamSchema.parse({ id: userId });
-    await activateUserService(id);
-    return { success: true, data: undefined };
-  } catch (error) {
-    return handleError(error, 'Failed to activate user');
-  }
-}
 
 /**
  * Send a password reset link to a user.

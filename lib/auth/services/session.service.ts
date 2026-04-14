@@ -7,7 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { AuthContext, UserRecord } from '../types/auth.types';
-import { UnauthenticatedError, NotFoundError } from '../types/auth.types';
+import { UnauthenticatedError, NotFoundError, ForbiddenError } from '../types/auth.types';
 import { getUserPermissions, getUserGroupSlugs } from './permission.service';
 
 /**
@@ -53,20 +53,34 @@ export async function getCurrentUserRecord(): Promise<UserRecord> {
 /**
  * Build a full AuthContext for the current request.
  * Includes the user's groups and permissions loaded from the database.
+ * Blocks non-active users with descriptive errors.
  *
  * @throws UnauthenticatedError if no valid session
+ * @throws ForbiddenError if user status is not 'active'
  */
 export async function getAuthContext(): Promise<AuthContext> {
-  const principal = await getPrincipal();
+  const userRecord = await getCurrentUserRecord();
+
+  // Block non-active users
+  if (userRecord.status === 'invited') {
+    throw new ForbiddenError(
+      'Your account setup is not complete. Please check your email for the invitation link.'
+    );
+  }
+  if (userRecord.status === 'suspended') {
+    throw new ForbiddenError(
+      'Your account has been disabled. Please contact your administrator.'
+    );
+  }
 
   const [groups, permissions] = await Promise.all([
-    getUserGroupSlugs(principal.id),
-    getUserPermissions(principal.id),
+    getUserGroupSlugs(userRecord.id),
+    getUserPermissions(userRecord.id),
   ]);
 
   return {
-    userId: principal.id,
-    email: principal.email ?? '',
+    userId: userRecord.id,
+    email: userRecord.email,
     groups,
     permissions,
   };

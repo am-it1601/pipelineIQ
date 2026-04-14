@@ -6,8 +6,8 @@ import { getInvitationsList } from "@/lib/actions_old/invitation.actions";
 import EmptyInvitations from "@/components/empty/EmptyInvitations";
 
 import PageHeader from "@/blocks/shared/PageHeader";
-import { InviteMemberDialog } from "@/components/invitations/InviteMemberDialog";
 import RoasterTable from "@/components/roaster/RoasterTable";
+import { InviteMemberDialog } from "@/components/user_management/invitations/InviteMemberDialog";
 import { getUsers } from "@/lib/action/user.action";
 import { ChevronDownIcon } from "lucide-react";
 import InvitationTable from "../../../components/invitations/InvitationTable";

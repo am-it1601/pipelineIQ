@@ -29,7 +29,7 @@ export type UpdateUserGroupsInput = z.infer<typeof updateUserGroupsSchema>;
 
 /** Update user status */
 export const updateUserStatusSchema = z.object({
-  status: z.enum(['active', 'inactive', 'suspended']),
+  status: z.enum(['invited', 'active', 'suspended']),
 });
 
 export type UpdateUserStatusInput = z.infer<typeof updateUserStatusSchema>;
@@ -38,7 +38,7 @@ export type UpdateUserStatusInput = z.infer<typeof updateUserStatusSchema>;
 export const updateUserProfileSchema = z.object({
   full_name: z.string().trim().min(1).optional(),
   avatar_initials: z.string().trim().max(3).optional(),
-  status: z.enum(['active', 'inactive', 'suspended']).optional(),
+  status: z.enum(['invited', 'active', 'suspended']).optional(),
   groupSlugs: z.array(z.string().min(1)).min(1).optional(),
 });
 
@@ -55,6 +55,15 @@ export const paginationSchema = z.object({
 });
 
 export type PaginationInput = z.infer<typeof paginationSchema>;
+
+/** User listing query parameters */
+export const listUsersQuerySchema = paginationSchema.extend({
+  status: z.enum(['invited', 'active', 'suspended']).optional(),
+  group: z.string().min(1).optional(),
+  search: z.string().min(1).optional(),
+});
+
+export type ListUsersQueryInput = z.infer<typeof listUsersQuerySchema>;
 
 /** User ID path parameter */
 export const userIdParamSchema = z.object({

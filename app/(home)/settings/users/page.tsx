@@ -1,6 +1,6 @@
 import PageHeader from "@/blocks/shared/PageHeader";
-import { InviteMemberDialog } from "@/components/invitations/InviteMemberDialog";
 import InvitationDirectoryCard from "@/components/user_management/invitations/InvitationDirectoryCard";
+import { InviteMemberDialog } from "@/components/user_management/invitations/InviteMemberDialog";
 import UserDirectoryCard from "@/components/user_management/UserDirectoryCard";
 
 const UserManagementPage = () => {

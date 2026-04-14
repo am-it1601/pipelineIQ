@@ -10,18 +10,21 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
   ChartPieIcon,
   FlagIcon,
   LayoutDashboardIcon,
+  SettingsIcon,
   TagIcon,
   TerminalIcon,
-  Users2Icon,
 } from "lucide-react";
 
 const data = {
@@ -31,28 +34,6 @@ const data = {
       url: "/dashboard",
       icon: <LayoutDashboardIcon />,
       isActive: true,
-    },
-    // {
-    //   title: "Leads",
-    //   icon: <FunnelIcon />,
-    //   items: [
-    //     {
-    //       title: "Hot Leads",
-    //       url: "/leads",
-    //       icon: <Table2Icon />,
-    //     },
-
-    //     {
-    //       title: "Leads Log Entry",
-    //       url: "/leads",
-    //       icon: <Table2Icon />,
-    //     },
-    //   ],
-    // },
-    {
-      title: "Users & Access Control",
-      url: "/users",
-      icon: <Users2Icon />,
     },
     {
       title: "Upwork Profiles",
@@ -102,6 +83,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
+
+        {/* Settings Link — bottom of content */}
+        <SidebarGroup className="mt-auto">
+          <SidebarSeparator />
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Settings"
+                  render={<a href="/settings" className="font-semibold p-2" />}
+                >
+                  <SettingsIcon className="size-4" />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

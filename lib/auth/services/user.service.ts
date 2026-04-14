@@ -52,7 +52,14 @@ export async function getUserByEmail(email: string): Promise<UserRecord | null> 
  */
 export async function updateUser(
   userId: string,
-  updates: Partial<Pick<UserRecord, 'full_name' | 'avatar_initials' | 'status'>>
+  updates: Partial<Pick<UserRecord,
+    | 'full_name'
+    | 'avatar_initials'
+    | 'status'
+    | 'invitation_accepted_at'
+    | 'invitation_expires_at'
+    | 'invitation_resent_count'
+  >>
 ): Promise<UserRecord> {
   const supabase = createAdminClient();
 
@@ -70,19 +77,6 @@ export async function updateUser(
   return data as UserRecord;
 }
 
-/**
- * Set a user's status to 'inactive'.
- */
-export async function deactivateUser(userId: string): Promise<UserRecord> {
-  return updateUser(userId, { status: 'inactive' });
-}
-
-/**
- * Set a user's status to 'active'.
- */
-export async function activateUser(userId: string): Promise<UserRecord> {
-  return updateUser(userId, { status: 'active' });
-}
 
 /**
  * Replace a user's group memberships entirely.

@@ -9,9 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { authKeys } from "@/hooks/api_hooks/auth.queries";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Loader, MailCheck, Mails, UserPlus } from "lucide-react";
 import { useState } from "react";
+import InvitationForm from "../../invitations/InvitationForm";
+import { InviteFormData } from "../../invitations/invitation.form";
 import {
   Empty,
   EmptyContent,
@@ -19,28 +23,27 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "../ui/empty";
-import { Separator } from "../ui/separator";
-import InvitationForm from "./InvitationForm";
-import { InviteFormData } from "./invitation.form";
+} from "../../ui/empty";
+import { Separator } from "../../ui/separator";
 
 interface InviteMemberDialogProps {
   onInviteSent?: () => void;
 }
 
 export function InviteMemberDialog({ onInviteSent }: InviteMemberDialogProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  let email = ""; // You can set this to the email being invited for a more personalized success message
+  let email = "";
   const onInvite = async (data: InviteFormData) => {
     setLoading(true);
     setApiError(null);
     email = data.email;
     try {
-      const res = await fetch("/api/invitations", {
+      const res = await fetch("/api/users/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -49,11 +52,14 @@ export function InviteMemberDialog({ onInviteSent }: InviteMemberDialogProps) {
       const responseData = await res.json();
 
       if (!res.ok) {
-        setApiError(responseData.error || "Failed to send invitation");
+        setApiError(responseData?.error?.message || "Failed to send invitation");
         setLoading(false);
         return;
       }
       setSuccess(true);
+      // Invalidate caches so lists refresh
+      queryClient.invalidateQueries({ queryKey: authKeys.invitations() });
+      queryClient.invalidateQueries({ queryKey: authKeys.users() });
       setTimeout(() => {
         setOpen(false);
         setSuccess(false);
@@ -66,41 +72,6 @@ export function InviteMemberDialog({ onInviteSent }: InviteMemberDialogProps) {
     }
   };
 
-  // const onSubmit = async (data: InviteFormData) => {
-  //   setLoading(true);
-  //   setApiError(null);
-
-  //   try {
-  //     const res = await fetch("/api/invitations", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(data),
-  //     });
-
-  //     const responseData = await res.json();
-
-  //     if (!res.ok) {
-  //       setApiError(responseData.error || "Failed to send invitation");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     setSuccessEmail(data.email);
-  //     setSuccess(true);
-  //     setTimeout(() => {
-  //       setOpen(false);
-  //       reset();
-  //       setSuccess(false);
-  //       setSuccessEmail("");
-  //       onInviteSent?.();
-  //     }, 1200);
-  //   } catch {
-  //     setApiError("Network error. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   return (
     <Dialog
       open={open}
@@ -111,13 +82,13 @@ export function InviteMemberDialog({ onInviteSent }: InviteMemberDialogProps) {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="place-self-end-safe">
+      <DialogTrigger>
         <Button size="lg">
           <UserPlus className="size-4" />
           Invite Member
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader className="pt-2">
           <DialogTitle className="flex items-center gap-2">
             <Mails className="size-5 text-primary" />
@@ -185,7 +156,7 @@ const InvitationSendProcessing = () => (
   <Empty className="bg-muted/30">
     <EmptyHeader>
       <EmptyMedia variant="default">
-        <Loader className="size-10 text-primary animate-[spin_2s_linear_infinite]" />
+        <Loader className="size-10 text-primary animate-[spin_2.5s_linear_infinite]" />
       </EmptyMedia>
       <EmptyTitle>Sending Invitation...</EmptyTitle>
       <EmptyDescription className="max-w-xs text-pretty">
