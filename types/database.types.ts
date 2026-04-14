@@ -290,10 +290,10 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          is_active: boolean | null
           is_deleted: boolean | null
           name: string
           skill_tags: string[] | null
-          status: string | null
           title: string | null
           updated_at: string | null
           url: string
@@ -301,10 +301,10 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          is_active?: boolean | null
           is_deleted?: boolean | null
           name: string
           skill_tags?: string[] | null
-          status?: string | null
           title?: string | null
           updated_at?: string | null
           url: string
@@ -312,10 +312,10 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          is_active?: boolean | null
           is_deleted?: boolean | null
           name?: string
           skill_tags?: string[] | null
-          status?: string | null
           title?: string | null
           updated_at?: string | null
           url?: string

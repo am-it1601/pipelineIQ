@@ -79,12 +79,14 @@ const AddNewProfileCard = ({ triggerType = "button", ...props }: AddNewProfileCa
       </DialogTrigger>
       <DialogContent className="md:min-w-[50vw] md:min-h-[50vh] shadow-lg" showCloseButton={false}>
         <DialogHeader className="p-2">
-          <DialogTitle className="font-bold inline-flex items-center gap-2">
+          <DialogTitle className="text-xl font-semibold inline-flex items-center gap-2">
             <BookmarkPlus className="size-6 text-primary" />
             Add new Upwork Profile
           </DialogTitle>
-          <DialogDescription>Enter Details to add new Upwork Profile</DialogDescription>
-          <Separator className="h-px" />
+          <DialogDescription className="text-muted-foreground/70 tracking-wide capitalize font-normal">
+            Enter Details to add new Upwork Profile
+          </DialogDescription>
+          <Separator className="h-[0.5px]" />
         </DialogHeader>
         {!loading && !apiError && !success && (
           <div className="max-h-[50vh] overflow-y-auto px-2 -mx-2 no-scrollbar">

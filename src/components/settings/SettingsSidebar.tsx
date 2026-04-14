@@ -90,7 +90,7 @@ export default function SettingsSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="none" className="hidden md:flex border-r bg-sidebar">
+    <Sidebar collapsible="none" className="hidden md:flex rounded-4xl shadow">
       {/* Header */}
       <SidebarHeader className="p-4 pb-2">
         <div className="flex items-center gap-2 mb-1">

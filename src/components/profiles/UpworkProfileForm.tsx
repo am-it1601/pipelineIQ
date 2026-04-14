@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleDollarSign, Link, NotepadText, Tags, Target, UserCircle } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
@@ -46,15 +47,22 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
         className="flex flex-col justify-between items-center no-scrollbar overflow-y-scroll px-2 h-full"
       >
         <FieldSet className="w-full gap-2 ">
-          <FieldGroup className="w-full grid grid-col-2 md:grid-cols-3 gap-4">
+          <FieldGroup className="w-full grid grid-col-2 md:grid-cols-3 gap-3">
             <Controller
               control={form.control}
               name="profile_name"
               render={({ field, fieldState }) => (
-                <Field className="w-full" data-invalid={fieldState.invalid} data-required={true}>
+                <Field
+                  className="w-full gap-2"
+                  data-invalid={fieldState.invalid}
+                  data-required={true}
+                >
                   <FieldLabel
-                    htmlFor="lead_date"
-                    className="text-xs font-semibold"
+                    htmlFor="profile_name"
+                    className={cn(
+                      fieldState.invalid ? "" : "text-muted-foreground",
+                      "text-xs tracking-wide"
+                    )}
                     aria-invalid={fieldState.invalid}
                   >
                     <UserCircle className="size-4" />
@@ -66,13 +74,13 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
                     aria-invalid={fieldState.invalid}
                     className="shadow bg-transparent border-border"
                   />
-                  {fieldState.error && (
+                  {fieldState.error ? (
                     <FieldError className="field_error">{fieldState.error.message}</FieldError>
+                  ) : (
+                    <FieldDescription className="field_description">
+                      Enter the full name of the professional or resource.
+                    </FieldDescription>
                   )}
-                  <FieldDescription className="field_description">
-                    Enter the full name of the professional or resource. This is for internal
-                    reference and can be the same as the name on the upwork profile
-                  </FieldDescription>
                 </Field>
               )}
             />
@@ -80,7 +88,7 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
               control={form.control}
               name="profile_link"
               render={({ field, fieldState }) => (
-                <Field className="w-full" data-invalid={fieldState.invalid}>
+                <Field className="w-full gap-2" data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="profile_link" className="text-xs font-semibold">
                     <Link className="size-4" />
                     Upwork Profile Link
@@ -91,13 +99,13 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
                     aria-invalid={fieldState.invalid}
                     className="shadow-2xs"
                   />
-                  {fieldState.error && (
+                  {fieldState.error ? (
                     <FieldError className="field_error">{fieldState.error.message}</FieldError>
+                  ) : (
+                    <FieldDescription className="field_description">
+                      Provide the direct Upwork profile URL of the resource.
+                    </FieldDescription>
                   )}
-                  <FieldDescription className="field_description">
-                    Provide the direct Upwork profile URL of the resource. This will help in quick
-                    reference and validation of the profile details.
-                  </FieldDescription>
                 </Field>
               )}
             />
@@ -121,13 +129,13 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
                     aria-invalid={fieldState.invalid}
                     aria-required={true}
                   />
-                  {fieldState.error && (
+                  {fieldState.error ? (
                     <FieldError className="field_error">{fieldState.error.message}</FieldError>
+                  ) : (
+                    <FieldDescription className="field_description">
+                      hourly rate of the freelancer as mentioned on their Upwork profile.
+                    </FieldDescription>
                   )}
-                  <FieldDescription className="field_description">
-                    Enter the current hourly rate of the freelancer as mentioned on their Upwork
-                    profile. Required for budget calculations and comparisons with other profiles.
-                  </FieldDescription>
                 </Field>
               )}
             />
