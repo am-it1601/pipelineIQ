@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { optionalNumberFromInput, upworkUrlSchema } from "../leads/lead.schema";
+import { optionalNumberFromInput, upworkUrlSchema } from "./shared.schema";
 
 export const upworkProfileSchema = z
   .object({
-    profile_name: z
+    name: z
       .string()
       .trim()
-      .min(1, "Profile Name is required.")
+      .min(1, "Name is required.")
       .max(200, "Profile Name must be 200 characters or less."),
-    profile_link: z.string().trim(),
-    focus_area: z.string().trim(),
+    url: z.string().trim(),
+    title: z.string().trim(),
     skill_tags: z
       .array(z.string().trim().min(1))
       .max(15, "Maximum 15 skills allowed")
@@ -19,18 +19,18 @@ export const upworkProfileSchema = z
     rate_per_hour: optionalNumberFromInput,
   })
   .superRefine((data, ctx) => {
-    if (!data.profile_link || data.profile_link.trim() === "") {
+    if (!data.url || data.url.trim() === "") {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["profile_link"],
         message: "Upwork link is required",
       });
     } else {
-      const parsed = upworkUrlSchema.safeParse(data.profile_link);
+      const parsed = upworkUrlSchema.safeParse(data.url);
       if (!parsed.success) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["profile_link"],
+          path: ["url"],
           message: parsed.error.issues[0]?.message ?? "Invalid Upwork link.",
         });
       }

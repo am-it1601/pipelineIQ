@@ -10,9 +10,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Used by both Server Actions and API Routes.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapRowToProfile(row: Record<string, any>): UpworkProfile {
-  return { ...row, status: row.status ?? "active" } as UpworkProfile;
-}
 
 // ============================================================
 // SERVICE FUNCTIONS
@@ -32,16 +29,17 @@ export async function getProfiles(
 ): Promise<UpworkProfile[]> {
   let query = supabase
     .from("upwork_profiles")
-    .select("id, profile_name, profile_link, focus_area, skill_tags, status")
-    .order("profile_name", { ascending: true });
+    .select("*")
+    .order("name", { ascending: true })
+    .order("created_at", { ascending: false });
 
   if (options.active !== undefined) {
-    query = query.eq("status", options.active ? "active" : "inactive");
+    query = query.eq("is_active", options.active);
   }
 
   const { data, error } = await query;
   if (error) throw new Error(`Failed to fetch Upwork profiles: ${error.message}`);
-  return (data ?? []).map(mapRowToProfile);
+  return data;
 }
 
 /**
@@ -51,7 +49,7 @@ export async function getProfileById(supabase: SupabaseClient, id: string): Prom
   const { data, error } = await supabase.from("upwork_profiles").select("*").eq("id", id).single();
 
   if (error || !data) throw new Error("Profile not found");
-  return mapRowToProfile(data);
+  return data;
 }
 
 export interface CreateProfileData {
@@ -82,7 +80,7 @@ export async function createProfileRecord(
     .single();
 
   if (error || !row) throw new Error(`Failed to create profile: ${error?.message}`);
-  return mapRowToProfile(row);
+  return row;
 }
 
 export interface UpdateProfileData {
@@ -116,7 +114,7 @@ export async function updateProfileRecord(
     .single();
 
   if (error || !data) throw new Error("Profile not found or update failed");
-  return mapRowToProfile(data);
+  return data;
 }
 
 /**

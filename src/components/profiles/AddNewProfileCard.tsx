@@ -2,6 +2,7 @@
 import { DialogRoot } from "@base-ui/react";
 import { BookmarkPlus, CircleCheckIcon, CirclePlus, LoaderIcon } from "lucide-react";
 import { useRef, useState } from "react";
+import { UpworkProfileFormValues } from "../../forms/profile.schema";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import {
@@ -15,7 +16,6 @@ import {
 } from "../ui/dialog";
 import { Separator } from "../ui/separator";
 import UpworkProfileForm, { type UpworkProfileFormRef } from "./UpworkProfileForm";
-import { UpworkProfileFormValues } from "./profile.schema";
 
 type AddNewProfileCardProps = {
   triggerType: "card" | "button";

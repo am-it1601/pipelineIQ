@@ -1,7 +1,4 @@
-import {
-  UpworkProfileFormValues,
-  upworkProfileSchema,
-} from "@//components/profiles/profile.schema";
+import { UpworkProfileFormValues, upworkProfileSchema } from "@/forms/profile.schema";
 import { createProfileRecord, getProfiles } from "@/lib/services/profiles.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";

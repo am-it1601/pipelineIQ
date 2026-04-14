@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleDollarSign, Link, NotepadText, Tags, Target, UserCircle } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { UpworkProfileFormInput, upworkProfileSchema } from "../../forms/profile.schema";
 import { BadgeInput } from "../custom/BadgeInput";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from "../ui/field";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { UpworkProfileFormInput, upworkProfileSchema } from "./profile.schema";
 
 type UpworkProfileFormProps = {
   onSubmit: (data: UpworkProfileFormInput) => Promise<void> | void;
@@ -27,10 +27,10 @@ const UpworkProfileForm = forwardRef<UpworkProfileFormRef, UpworkProfileFormProp
       shouldUnregister: true,
       mode: "all",
       defaultValues: {
-        profile_name: "",
-        profile_link: "",
+        name: "",
+        url: "",
         bio: "",
-        focus_area: "",
+        title: "",
         skill_tags: [],
         rate_per_hour: "",
       },

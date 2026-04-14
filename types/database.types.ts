@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       app_settings: {
@@ -288,35 +313,38 @@ export type Database = {
       }
       upwork_profiles: {
         Row: {
+          bio: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
           is_deleted: boolean | null
           name: string
           skill_tags: string[] | null
-          title: string | null
+          title: string
           updated_at: string | null
           url: string
         }
         Insert: {
+          bio?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           is_deleted?: boolean | null
           name: string
           skill_tags?: string[] | null
-          title?: string | null
+          title: string
           updated_at?: string | null
           url: string
         }
         Update: {
+          bio?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           is_deleted?: boolean | null
           name?: string
           skill_tags?: string[] | null
-          title?: string | null
+          title?: string
           updated_at?: string | null
           url?: string
         }
@@ -591,6 +619,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

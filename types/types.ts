@@ -50,15 +50,7 @@ export interface BDMember extends OmittedBDMember {
 // UPWORK PROFILE TYPES
 // ============================================================
 
-export type ProfileStatus = "active" | "inactive";
-
-export type OmittedUpworkProfile = Omit<
-  Database["public"]["Tables"]["upwork_profiles"]["Row"],
-  "status"
->;
-export interface UpworkProfile extends OmittedUpworkProfile {
-  status: ProfileStatus;
-}
+export type UpworkProfile = Database["public"]["Tables"]["upwork_profiles"]["Row"];
 
 // ============================================================
 // LEAD LOG ENTRY TYPES
