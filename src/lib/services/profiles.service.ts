@@ -72,13 +72,15 @@ export async function createProfileRecord(
     return row;
 }
 
-export interface UpdateProfileData {
-    profile_name?: string;
-    profile_link?: string;
-    focus_area?: string;
-    skill_tags?: string;
-    status?: "active" | "inactive";
-}
+export type UpdateProfileData = Partial<{
+    name: string;
+    url: string;
+    title: string;
+    bio: string;
+    skill_tags: string[];
+    rate_per_hour: number;
+    is_active: boolean;
+}>;
 
 /**
  * Partially updates an Upwork profile by ID. Returns the updated UpworkProfile.
@@ -88,14 +90,12 @@ export async function updateProfileRecord(
     id: string,
     patch: UpdateProfileData
 ): Promise<UpworkProfile> {
-    const dbPatch: Record<string, unknown> = {};
-    if (patch.profile_name !== undefined) dbPatch.profile_name = patch.profile_name;
-    if (patch.profile_link !== undefined) dbPatch.profile_link = patch.profile_link;
-    if (patch.focus_area !== undefined) dbPatch.focus_area = patch.focus_area;
-    if (patch.skill_tags !== undefined) dbPatch.skill_tags = patch.skill_tags;
-    if (patch.status !== undefined) dbPatch.status = patch.status;
-
-    const { data, error } = await supabase.from("upwork_profiles").update(dbPatch).eq("id", id).select().single();
+    const { data, error } = await supabase
+        .from("upwork_profiles")
+        .update({ ...patch, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single();
 
     if (error || !data) throw new Error("Profile not found or update failed");
     return data;

@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils";
 import { UpworkProfile } from "@/types/types";
-import { Trash2 } from "lucide-react";
 import { Avatar, AvatarBadge, AvatarFallback } from "../ui/avatar";
-import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "../ui/item";
+import ProfileActionMenu from "./ProfileActionMenu";
 
 const ProfileItem = ({ profile }: { profile: UpworkProfile }) => {
     return (
@@ -25,9 +24,7 @@ const ProfileItem = ({ profile }: { profile: UpworkProfile }) => {
             </ItemContent>
             <ItemActions className="justify-between basis-1/4">
                 <p className="flex-1 text-center">15$/hour</p>
-                <Button variant="outline" size="icon-xs">
-                    <Trash2 className="size-4" />
-                </Button>
+                <ProfileActionMenu profile={profile} />
             </ItemActions>
         </Item>
     );

@@ -1,6 +1,6 @@
-import ProfileDirectory from "@//components/upwork_profiles/ProfileDirectory";
 import PageHeader from "@/components/custom/PageHeader";
 import AddNewProfileCard from "@/components/profiles/AddNewProfileCard";
+import ProfileDirectory from "@/components/profiles/ProfileDirectory";
 
 const page = () => {
     return (

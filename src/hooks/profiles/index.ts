@@ -9,10 +9,4 @@
 
 export { profileKeys } from './profile.keys';
 export { useProfileList, useProfileDetail } from './profile.queries';
-export {
-  useCreateProfile,
-  useUpdateProfile,
-  useDeleteProfile,
-  type CreateProfilePayload,
-  type UpdateProfilePayload,
-} from './profile.mutations';
+export { useCreateProfile, useUpdateProfile, useDeleteProfile } from './profile.mutations';

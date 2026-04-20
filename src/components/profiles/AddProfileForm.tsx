@@ -21,9 +21,11 @@ type AddProfileFormProps = {
     onSubmit: (formValues: UpworkProfileFormInput, action: SubmitAction) => Promise<boolean> | boolean;
     onCancel?: () => void;
     isSubmitting: boolean;
+    mode?: "create" | "edit";
+    initialValues?: UpworkProfileFormInput;
 };
 
-const defaultValues: UpworkProfileFormInput = {
+const emptyValues: UpworkProfileFormInput = {
     name: "",
     url: "",
     bio: "",
@@ -34,13 +36,20 @@ const defaultValues: UpworkProfileFormInput = {
 
 const labelClassName = "text-xs tracking-wide";
 
-export const AddProfileForm = ({ onSubmit, onCancel, isSubmitting }: AddProfileFormProps) => {
+export const AddProfileForm = ({
+    onSubmit,
+    onCancel,
+    isSubmitting,
+    mode = "create",
+    initialValues,
+}: AddProfileFormProps) => {
     const submitActionRef = useRef<SubmitAction>("exit");
+    const isEdit = mode === "edit";
 
     const form = useForm<UpworkProfileFormInput>({
         resolver: zodResolver(upworkProfileSchema),
         mode: "onBlur",
-        defaultValues,
+        defaultValues: initialValues ?? emptyValues,
     });
 
     const {
@@ -58,7 +67,7 @@ export const AddProfileForm = ({ onSubmit, onCancel, isSubmitting }: AddProfileF
         if (!success) return;
 
         if (action === "new") {
-            reset(defaultValues);
+            reset(emptyValues);
             return;
         }
     };
@@ -227,17 +236,19 @@ export const AddProfileForm = ({ onSubmit, onCancel, isSubmitting }: AddProfileF
                     </Button>
                 )}
 
-                <Button
-                    size="sm"
-                    variant="secondary"
-                    type="submit"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                        submitActionRef.current = "new";
-                    }}
-                >
-                    Save & New
-                </Button>
+                {!isEdit && (
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        type="submit"
+                        disabled={isSubmitting}
+                        onClick={() => {
+                            submitActionRef.current = "new";
+                        }}
+                    >
+                        Save & New
+                    </Button>
+                )}
 
                 <Button
                     size="sm"
@@ -247,7 +258,7 @@ export const AddProfileForm = ({ onSubmit, onCancel, isSubmitting }: AddProfileF
                         submitActionRef.current = "exit";
                     }}
                 >
-                    Save & Exit
+                    {isEdit ? "Save Changes" : "Save & Exit"}
                 </Button>
             </div>
         </form>

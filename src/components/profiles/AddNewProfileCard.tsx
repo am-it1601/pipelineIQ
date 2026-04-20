@@ -1,40 +1,96 @@
 "use client";
 
 import { UpworkProfileFormInput } from "@/forms/profile.schema";
-import { useCreateProfile } from "@/hooks/profiles";
-import { CirclePlusIcon } from "lucide-react";
+import { useCreateProfile, useUpdateProfile } from "@/hooks/profiles";
+import type { UpworkProfile } from "@/types/types";
+import { CircleCheckIcon, CirclePlusIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 import State from "../custom/State";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Separator } from "../ui/separator";
 import { AddProfileForm } from "./AddProfileForm";
-type AddNewProfileCardProps = React.ComponentProps<typeof DialogPrimitive.Root>;
 
-const AddNewProfileCard = (props: AddNewProfileCardProps) => {
-    const [open, setIsOpen] = useState(false);
+type AddNewProfileCardProps = Omit<
+    React.ComponentProps<typeof DialogPrimitive.Root>,
+    "open" | "onOpenChange" | "children"
+> & {
+    /** Pass a profile to open the dialog in edit mode. */
+    profile?: UpworkProfile;
+    /** Controlled open state. When omitted, the dialog is self-managed and renders its trigger. */
+    open?: boolean;
+    /** Controlled open-change handler. */
+    onOpenChange?: (open: boolean) => void;
+    /** Custom trigger node. Only rendered when the dialog is uncontrolled. */
+    trigger?: ReactNode;
+};
 
-    const { mutateAsync, isPending, isSuccess, isIdle, reset } = useCreateProfile();
+const AddNewProfileCard = ({
+    profile,
+    open: controlledOpen,
+    onOpenChange: controlledOnOpenChange,
+    trigger,
+    ...rootProps
+}: AddNewProfileCardProps) => {
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : uncontrolledOpen;
+
+    const setOpen = (next: boolean) => {
+        if (isControlled) controlledOnOpenChange?.(next);
+        else setUncontrolledOpen(next);
+    };
+
+    const isEdit = !!profile;
+
+    const createMutation = useCreateProfile();
+    const updateMutation = useUpdateProfile(profile?.id ?? "");
+    const { mutateAsync, isPending, isSuccess, isIdle, reset } = isEdit ? updateMutation : createMutation;
+
+    const initialValues = useMemo<UpworkProfileFormInput | undefined>(() => {
+        if (!profile) return undefined;
+        return {
+            name: profile.name ?? "",
+            url: profile.url ?? "",
+            title: profile.title ?? "",
+            bio: profile.bio ?? "",
+            skill_tags: profile.skill_tags ?? [],
+            rate_per_hour:
+                profile.rate_per_hour !== null && profile.rate_per_hour !== undefined
+                    ? String(profile.rate_per_hour)
+                    : "",
+        };
+    }, [profile]);
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen && isPending) return;
+        if (!nextOpen) reset();
+        setOpen(nextOpen);
+    };
 
     const handleCancel = () => {
         if (isPending) return;
-        setIsOpen(false);
+        setOpen(false);
     };
 
     const handleSubmit = async (values: UpworkProfileFormInput, action: "new" | "exit") => {
         try {
             await mutateAsync(values);
 
-            toast.success(
-                action === "new" ? "Profile saved. You can add another one now." : "Profile saved successfully."
-            );
+            const successMessage = isEdit
+                ? "Profile updated successfully."
+                : action === "new"
+                    ? "Profile saved. You can add another one now."
+                    : "Profile saved successfully.";
 
-            if (action === "exit") {
+            toast.success(successMessage);
+
+            if (isEdit || action === "exit") {
                 setTimeout(() => {
                     reset();
-                    setIsOpen(false);
+                    setOpen(false);
                 }, 2000);
             } else {
                 setTimeout(() => {
@@ -44,42 +100,61 @@ const AddNewProfileCard = (props: AddNewProfileCardProps) => {
 
             return true;
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Something went wrong while saving the profile.";
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : isEdit
+                        ? "Something went wrong while updating the profile."
+                        : "Something went wrong while saving the profile.";
             toast.error(message);
             return false;
         }
     };
 
+    const title = isEdit ? "Edit Upwork Profile" : "Add new Upwork Profile";
+    const description = isEdit
+        ? "Update the details of this Upwork profile."
+        : "Enter details to add a new Upwork profile.";
+    const pendingTitle = isEdit ? "Updating Profile..." : "Saving Profile...";
+    const pendingDescription = isEdit
+        ? "Your changes are being saved. Please wait."
+        : "Your new Upwork profile is being saved. Please wait.";
+    const successTitle = isEdit ? "Profile Updated!" : "Profile Added!";
+    const successDescription = isEdit
+        ? "The Upwork profile has been updated successfully."
+        : "The new Upwork profile has been added successfully.";
+    const successIcon = isEdit ? CircleCheckIcon : CirclePlusIcon;
+
     return (
-        <Dialog {...props} open={open} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button>Add new Profile</Button>
-            </DialogTrigger>
+        <Dialog {...rootProps} open={open} onOpenChange={handleOpenChange}>
+            {!isControlled && (
+                <DialogTrigger asChild>{trigger ?? <Button>Add new Profile</Button>}</DialogTrigger>
+            )}
 
             <DialogContent className="shadow-lg md:min-h-[50vh] md:min-w-[50vw]" showCloseButton={false}>
                 <DialogHeader className="px-3">
-                    <DialogTitle className="text-primary text-xl">Add new Upwork Profile</DialogTitle>
-                    <DialogDescription>Enter details to add a new Upwork profile.</DialogDescription>
+                    <DialogTitle className="text-primary text-xl">{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
                     <Separator className="sm:h-px" />
                 </DialogHeader>
 
                 <div className="no-scrollbar -mx-2 flex max-h-[50vh] w-full flex-col items-center justify-center gap-4 overflow-y-auto px-2">
                     {isIdle && (
-                        <AddProfileForm onCancel={handleCancel} onSubmit={handleSubmit} isSubmitting={isPending} />
-                    )}
-                    {isPending && (
-                        <State
-                            variant="pending"
-                            title="Saving Profile..."
-                            description="Your new Upwork profile is being saved. Please wait."
+                        <AddProfileForm
+                            mode={isEdit ? "edit" : "create"}
+                            initialValues={initialValues}
+                            onCancel={handleCancel}
+                            onSubmit={handleSubmit}
+                            isSubmitting={isPending}
                         />
                     )}
+                    {isPending && <State variant="pending" title={pendingTitle} description={pendingDescription} />}
                     {isSuccess && (
                         <State
                             variant="success"
-                            title="Profile Added!"
-                            description="The new Upwork profile has been added successfully."
-                            icon={CirclePlusIcon}
+                            title={successTitle}
+                            description={successDescription}
+                            icon={successIcon}
                         />
                     )}
                 </div>

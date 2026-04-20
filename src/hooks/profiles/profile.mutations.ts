@@ -34,21 +34,6 @@ async function profileMutate<T>(url: string, method: "POST" | "PATCH" | "DELETE"
 // Types
 // ============================================================
 
-export interface CreateProfilePayload {
-    profile_name: string;
-    profile_link: string;
-    focus_area?: string;
-    skill_tags?: string[];
-}
-
-export interface UpdateProfilePayload {
-    profile_name?: string;
-    profile_link?: string;
-    focus_area?: string;
-    skill_tags?: string;
-    status?: "active" | "inactive";
-}
-
 // ============================================================
 // Mutation Hooks
 // ============================================================
@@ -78,7 +63,8 @@ export function useUpdateProfile(id: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: UpdateProfilePayload) => profileMutate<UpworkProfile>(`/api/profiles/${id}`, "PATCH", data),
+        mutationFn: (data: UpworkProfileFormInput) =>
+            profileMutate<UpworkProfile>(`/api/profiles/${id}`, "PATCH", data),
         onSuccess: (updatedProfile) => {
             // Update the detail cache in-place for instant UI response
             queryClient.setQueryData(profileKeys.detail(id), updatedProfile);

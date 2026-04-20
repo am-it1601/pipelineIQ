@@ -319,6 +319,7 @@ export type Database = {
           is_active: boolean | null
           is_deleted: boolean | null
           name: string
+          rate_per_hour: number | null
           skill_tags: string[] | null
           title: string
           updated_at: string | null
@@ -331,6 +332,7 @@ export type Database = {
           is_active?: boolean | null
           is_deleted?: boolean | null
           name: string
+          rate_per_hour?: number | null
           skill_tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -343,6 +345,7 @@ export type Database = {
           is_active?: boolean | null
           is_deleted?: boolean | null
           name?: string
+          rate_per_hour?: number | null
           skill_tags?: string[] | null
           title?: string
           updated_at?: string | null
