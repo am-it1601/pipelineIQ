@@ -1,137 +1,91 @@
 "use client";
-import { DialogRoot } from "@base-ui/react";
-import { BookmarkPlus, CircleCheckIcon, CirclePlus, LoaderIcon } from "lucide-react";
-import { useRef, useState } from "react";
-import { UpworkProfileFormValues } from "../../forms/profile.schema";
+
+import { UpworkProfileFormInput } from "@/forms/profile.schema";
+import { useCreateProfile } from "@/hooks/profiles";
+import { CirclePlusIcon } from "lucide-react";
+import { Dialog as DialogPrimitive } from "radix-ui";
+import { useState } from "react";
+import { toast } from "sonner";
+import State from "../custom/State";
 import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Separator } from "../ui/separator";
-import UpworkProfileForm, { type UpworkProfileFormRef } from "./UpworkProfileForm";
+import { AddProfileForm } from "./AddProfileForm";
+type AddNewProfileCardProps = React.ComponentProps<typeof DialogPrimitive.Root>;
 
-type AddNewProfileCardProps = {
-  triggerType: "card" | "button";
-} & DialogRoot.Props;
+const AddNewProfileCard = (props: AddNewProfileCardProps) => {
+    const [open, setIsOpen] = useState(false);
 
-const AddNewProfileCard = ({ triggerType = "button", ...props }: AddNewProfileCardProps) => {
-  const formRef = useRef<UpworkProfileFormRef>(null);
+    const { mutateAsync, isPending, isSuccess, isIdle, reset } = useCreateProfile();
 
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+    const handleCancel = () => {
+        if (isPending) return;
+        setIsOpen(false);
+    };
 
-  const handleSave = (data: UpworkProfileFormValues) => {
-    console.log("Form submitted with data:", data);
-    saveProfile(data);
-    setDialogOpen(false);
-    setTimeout(() => {
-      setSuccess(false);
-      setDialogOpen(false);
-    }, 2000);
-    // TODO: Call API to save profile
-  };
+    const handleSubmit = async (values: UpworkProfileFormInput, action: "new" | "exit") => {
+        try {
+            await mutateAsync(values);
 
-  const handleSaveAndNew = (data: UpworkProfileFormValues) => {
-    console.log("Form submitted and new with data:", data);
-    saveProfile(data);
-    setTimeout(() => {
-      setSuccess(false);
-    }, 2000);
-  };
+            toast.success(
+                action === "new" ? "Profile saved. You can add another one now." : "Profile saved successfully."
+            );
 
-  const saveProfile = async (data: UpworkProfileFormValues) => {
-    setLoading(true);
-    setApiError(null);
-    try {
-      const res = await fetch("/api/profiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+            if (action === "exit") {
+                setTimeout(() => {
+                    reset();
+                    setIsOpen(false);
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    reset();
+                }, 1000);
+            }
 
-      const responseData = await res.json();
+            return true;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Something went wrong while saving the profile.";
+            toast.error(message);
+            return false;
+        }
+    };
 
-      if (!res.ok) {
-        setApiError(responseData.error || "Failed to add profile");
-        setLoading(false);
-        return;
-      }
-      setSuccess(true);
-    } catch {
-      setApiError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <Dialog {...props} open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger>
-        {triggerType === "button" ? <ButtonTypeTrigger /> : <CardTypeTrigger />}
-      </DialogTrigger>
-      <DialogContent className="md:min-w-[50vw] md:min-h-[50vh] shadow-lg" showCloseButton={false}>
-        <DialogHeader className="p-2">
-          <DialogTitle className="text-xl font-semibold inline-flex items-center gap-2">
-            <BookmarkPlus className="size-6 text-primary" />
-            Add new Upwork Profile
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground/70 tracking-wide capitalize font-normal">
-            Enter Details to add new Upwork Profile
-          </DialogDescription>
-          <Separator className="h-[0.5px]" />
-        </DialogHeader>
-        {!loading && !apiError && !success && (
-          <div className="max-h-[50vh] overflow-y-auto px-2 -mx-2 no-scrollbar">
-            <UpworkProfileForm ref={formRef} onSubmit={handleSave} onSubmitNew={handleSaveAndNew} />
-          </div>
-        )}
-        {success && (
-          <div className="max-h-[50vh] overflow-y-auto px-2 -mx-2 no-scrollbar flex flex-col items-center justify-center gap-4">
-            <CircleCheckIcon className="size-12 animate-out text-primary" />
-            <p className="text-secondary">Profile added successfully!</p>
-          </div>
-        )}
-        {loading && (
-          <div className="max-h-[50vh] overflow-y-auto px-2 -mx-2 no-scrollbar flex flex-col items-center justify-center gap-4">
-            <LoaderIcon className="size-12 animate-spin text-primary" />
-            <p className="text-secondary">Saving profile...</p>
-          </div>
-        )}
-        <DialogFooter className="flex justify-between">
-          <Button variant="ghost" onClick={() => setDialogOpen(false)}>
-            Close
-          </Button>
-          <div className="inline-flex gap-2">
-            <Button disabled={loading} onClick={() => formRef.current?.submitNew()}>
-              Save & Add Another
-            </Button>
-            <Button disabled={loading} onClick={() => formRef.current?.submit()}>
-              Save
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+    return (
+        <Dialog {...props} open={open} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button>Add new Profile</Button>
+            </DialogTrigger>
+
+            <DialogContent className="shadow-lg md:min-h-[50vh] md:min-w-[50vw]" showCloseButton={false}>
+                <DialogHeader className="px-3">
+                    <DialogTitle className="text-primary text-xl">Add new Upwork Profile</DialogTitle>
+                    <DialogDescription>Enter details to add a new Upwork profile.</DialogDescription>
+                    <Separator className="sm:h-px" />
+                </DialogHeader>
+
+                <div className="no-scrollbar -mx-2 flex max-h-[50vh] w-full flex-col items-center justify-center gap-4 overflow-y-auto px-2">
+                    {isIdle && (
+                        <AddProfileForm onCancel={handleCancel} onSubmit={handleSubmit} isSubmitting={isPending} />
+                    )}
+                    {isPending && (
+                        <State
+                            variant="pending"
+                            title="Saving Profile..."
+                            description="Your new Upwork profile is being saved. Please wait."
+                        />
+                    )}
+                    {isSuccess && (
+                        <State
+                            variant="success"
+                            title="Profile Added!"
+                            description="The new Upwork profile has been added successfully."
+                            icon={CirclePlusIcon}
+                        />
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 };
-
-const CardTypeTrigger = () => (
-  <Card className="w-90 h-full shadow hover:shadow-lg p-4 group">
-    <CardContent className="flex flex-col gap-2 rounded-[5%] hover:text-primary hover:border-primary items-center justify-center border-accent border-2 border-dashed h-full">
-      <CirclePlus className="size-16 text-accent group-hover:text-primary" />
-      <p className="text-xl">Add new Profile</p>
-    </CardContent>
-  </Card>
-);
-
-const ButtonTypeTrigger = () => <Button>Add new Profile</Button>;
 
 export default AddNewProfileCard;
