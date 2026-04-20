@@ -1,4 +1,4 @@
-import { UpworkProfileFormValues, upworkProfileSchema } from "@/forms/profile.schema";
+import { upworkProfileUpdateSchema } from "@/forms/profile.schema";
 import { deleteProfileRecord, getProfileById, updateProfileRecord } from "@/lib/services/profiles.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,10 +17,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const body: UpworkProfileFormValues = await req.json();
+        const body = await req.json();
 
-        // Validate request body using Zod schema (coerces rate_per_hour and trims strings)
-        const validatedData = upworkProfileSchema.parse(body);
+        // Partial validation: accepts full edits from the form as well as
+        // status-only toggles (e.g. { is_active: false }).
+        const validatedData = upworkProfileUpdateSchema.parse(body);
 
         const supabase = createAdminClient();
         const updated = await updateProfileRecord(supabase, id, validatedData);

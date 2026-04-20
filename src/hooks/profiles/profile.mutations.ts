@@ -5,7 +5,7 @@
  * Each mutation auto-invalidates relevant query caches on success.
  */
 
-import { UpworkProfileFormInput } from "@/forms/profile.schema";
+import { UpworkProfileFormInput, UpworkProfileUpdateInput } from "@/forms/profile.schema";
 import type { UpworkProfile } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileKeys } from "./profile.keys";
@@ -57,13 +57,16 @@ export function useCreateProfile() {
 /**
  * Update an existing upwork profile.
  *
+ * Accepts partial updates so the same hook backs both the edit form
+ * and lightweight status toggles (e.g. `{ is_active: false }`).
+ *
  * Invalidates both the list and the specific detail cache.
  */
 export function useUpdateProfile(id: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: UpworkProfileFormInput) =>
+        mutationFn: (data: UpworkProfileUpdateInput) =>
             profileMutate<UpworkProfile>(`/api/profiles/${id}`, "PATCH", data),
         onSuccess: (updatedProfile) => {
             // Update the detail cache in-place for instant UI response

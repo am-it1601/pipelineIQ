@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { UpworkProfile } from "@/types/types";
 import { Avatar, AvatarBadge, AvatarFallback } from "../ui/avatar";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "../ui/item";
@@ -22,8 +22,11 @@ const ProfileItem = ({ profile }: { profile: UpworkProfile }) => {
                     {profile.bio || "No description provided."}
                 </ItemDescription>
             </ItemContent>
-            <ItemActions className="justify-between basis-1/4">
-                <p className="flex-1 text-center">15$/hour</p>
+            <ItemActions className="justify-around basis-1/4">
+                <div className="flex flex-col items-center justify-between gap-0.5 p-2.5 text-primary font-extrabold whitespace-nowrap align-top border bg-card shadow border-primary/10 rounded-2xl">
+                    <div className="text-xl">{formatCurrency(profile.rate_per_hour ?? 0)}</div>
+                    <div className="text-xs text-muted-foreground font-normal tracking-wider">/hour</div>
+                </div>
                 <ProfileActionMenu profile={profile} />
             </ItemActions>
         </Item>
