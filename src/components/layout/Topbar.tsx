@@ -73,7 +73,7 @@ export default function Topbar() {
                     </DropdownMenu>
 
                     <DropdownMenu>
-                        <DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild>
                             <Avatar>
                                 <AvatarFallback>{currentUser?.user_metadata.avatar_initials}</AvatarFallback>
                             </Avatar>

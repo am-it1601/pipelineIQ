@@ -101,8 +101,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarGroupLabel className="sb-group_label">Home</SidebarGroupLabel>
                     {nav_main && nav_main.length > 0 && (
                         <SidebarMenu>
-                            {nav_main.map((menu) => (
-                                <SidebarMenuItem>
+                            {nav_main.map((menu, index) => (
+                                <SidebarMenuItem key={menu.name + "_" + index}>
                                     <SidebarMenuButton asChild tooltip={menu.name} className="sb-menu__btn">
                                         <Link href={menu.href}>
                                             <span className="text-muted-foreground">{menu.icon && <menu.icon />}</span>
@@ -119,8 +119,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarGroupLabel className="sb-group_label">Lead Management</SidebarGroupLabel>
                     {nav_lead_management && nav_lead_management.length > 0 && (
                         <SidebarMenu>
-                            {nav_lead_management.map((menu) => (
-                                <SidebarMenuItem>
+                            {nav_lead_management.map((menu, index) => (
+                                <SidebarMenuItem key={menu.name + "_" + index}>
                                     <SidebarMenuButton asChild tooltip={menu.name} className="sb-menu__btn">
                                         <Link href={menu.href}>
                                             <span className="text-muted-foreground">{menu.icon && <menu.icon />}</span>
@@ -136,8 +136,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarGroupLabel className="sb-group_label">Profile Management</SidebarGroupLabel>
                     {nav_profiles && nav_profiles.length > 0 && (
                         <SidebarMenu>
-                            {nav_profiles.map((menu) => (
-                                <SidebarMenuItem>
+                            {nav_profiles.map((menu, index) => (
+                                <SidebarMenuItem key={menu.name + "_" + index}>
                                     <SidebarMenuButton asChild tooltip={menu.name} className="sb-menu__btn">
                                         <Link href={menu.href}>
                                             <span className="text-muted-foreground">{menu.icon && <menu.icon />}</span>
@@ -153,8 +153,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarGroupLabel className="sb-group_label">Reports & Analytics</SidebarGroupLabel>
                     {nav_reports && nav_reports.length > 0 && (
                         <SidebarMenu>
-                            {nav_reports.map((menu) => (
-                                <SidebarMenuItem>
+                            {nav_reports.map((menu, index) => (
+                                <SidebarMenuItem key={menu.name + "_" + index}>
                                     <SidebarMenuButton asChild tooltip={menu.name} className="sb-menu__btn">
                                         <Link href={menu.href}>
                                             <span className="text-muted-foreground">{menu.icon && <menu.icon />}</span>
