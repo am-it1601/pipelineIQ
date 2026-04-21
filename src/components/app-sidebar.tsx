@@ -37,18 +37,18 @@ const nav_lead_management = [
     {
         icon: SparklesIcon,
         name: "Prospects Watchlist",
-        href: "/leads",
+        href: "/prospects",
     },
 
     {
         icon: BriefcaseBusinessIcon,
         name: "Active Prospects",
-        href: "/leads",
+        href: "/prospects",
     },
     {
         icon: ArchiveIcon,
         name: "Archive",
-        href: "/leads",
+        href: "/prospects",
     },
 ];
 

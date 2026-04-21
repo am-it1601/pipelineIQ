@@ -1,7 +1,7 @@
 "use client";
 
 import { UpworkProfileFormInput } from "@/forms/profile.schema";
-import { useCreateProfile, useUpdateProfile } from "@/hooks/profiles";
+import { useCreateProfile, useUpdateProfile } from "@/hooks/http/profiles";
 import type { UpworkProfile } from "@/types/types";
 import { CircleCheckIcon, CirclePlusIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -82,8 +82,8 @@ const AddNewProfileCard = ({
             const successMessage = isEdit
                 ? "Profile updated successfully."
                 : action === "new"
-                    ? "Profile saved. You can add another one now."
-                    : "Profile saved successfully.";
+                  ? "Profile saved. You can add another one now."
+                  : "Profile saved successfully.";
 
             toast.success(successMessage);
 
@@ -104,8 +104,8 @@ const AddNewProfileCard = ({
                 error instanceof Error
                     ? error.message
                     : isEdit
-                        ? "Something went wrong while updating the profile."
-                        : "Something went wrong while saving the profile.";
+                      ? "Something went wrong while updating the profile."
+                      : "Something went wrong while saving the profile.";
             toast.error(message);
             return false;
         }
@@ -127,9 +127,7 @@ const AddNewProfileCard = ({
 
     return (
         <Dialog {...rootProps} open={open} onOpenChange={handleOpenChange}>
-            {!isControlled && (
-                <DialogTrigger asChild>{trigger ?? <Button>Add new Profile</Button>}</DialogTrigger>
-            )}
+            {!isControlled && <DialogTrigger asChild>{trigger ?? <Button>Add new Profile</Button>}</DialogTrigger>}
 
             <DialogContent className="shadow-lg md:min-h-[50vh] md:min-w-[50vw]" showCloseButton={false}>
                 <DialogHeader className="px-3">

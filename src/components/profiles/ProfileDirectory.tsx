@@ -1,5 +1,5 @@
 "use client";
-import { useProfileList } from "@/hooks/profiles";
+import { useProfileList } from "@/hooks/http/profiles";
 import State from "../custom/State";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Pagination } from "../ui/pagination";

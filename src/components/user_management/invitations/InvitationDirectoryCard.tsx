@@ -15,8 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useResendInvitation, useRevokeInvitation } from "@/hooks/api_hooks/auth.mutations";
-import { useInvitationList } from "@/hooks/api_hooks/auth.queries";
+import { useResendInvitation, useRevokeInvitation } from "@/hooks/http/auth/auth.mutations";
+import { useInvitationList } from "@/hooks/http/auth/auth.queries";
 import type { UserWithDetails } from "@/lib/auth/types/auth.types";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, Mail, RefreshCw, Trash2 } from "lucide-react";

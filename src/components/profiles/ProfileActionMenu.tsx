@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeleteProfile, useUpdateProfile } from "@/hooks/profiles";
+import { useDeleteProfile, useUpdateProfile } from "@/hooks/http/profiles";
 import type { UpworkProfile } from "@/types/types";
 import { BanIcon, CirclePlay, EllipsisVertical, Loader2, PencilIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
@@ -112,8 +112,8 @@ const ProfileActionMenu = ({ profile }: ProfileActionMenuProps) => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete this profile?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently remove <span className="font-medium text-foreground">{profile.name}</span>{" "}
-                            and cannot be undone.
+                            This will permanently remove{" "}
+                            <span className="font-medium text-foreground">{profile.name}</span> and cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

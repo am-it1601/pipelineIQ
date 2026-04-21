@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { authKeys } from "@/hooks/api_hooks/auth.queries";
+import { authKeys } from "@/hooks/http/auth/auth.queries";
 
 import State from "@/components/custom/State";
 import { useQueryClient } from "@tanstack/react-query";

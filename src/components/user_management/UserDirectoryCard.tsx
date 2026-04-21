@@ -21,7 +21,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUserList } from "@/hooks/api_hooks/auth.queries";
+import { useUserList } from "@/hooks/http/auth/auth.queries";
 import { UserWithDetails } from "@/lib/auth/types/auth.types";
 import { useState } from "react";
 import { Separator } from "../ui/separator";
