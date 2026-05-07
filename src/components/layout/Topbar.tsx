@@ -16,6 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 const PAGE_TITLES: Record<string, string> = {
     "/dashboard": "Dashboard",
@@ -71,6 +72,8 @@ export default function Topbar() {
                             <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <NotificationBell />
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

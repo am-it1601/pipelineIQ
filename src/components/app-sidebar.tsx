@@ -22,6 +22,7 @@ import {
     SparklesIcon,
     SpotlightIcon,
     TerminalIcon,
+    ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -34,6 +35,11 @@ const nav_main = [
 ];
 
 const nav_lead_management = [
+    {
+        icon: ZapIcon,
+        name: "Leads",
+        href: "/leads",
+    },
     {
         icon: SparklesIcon,
         name: "Prospects Watchlist",
