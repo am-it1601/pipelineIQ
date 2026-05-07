@@ -102,7 +102,15 @@ export async function queryLeads(
   // Data query
   let dataQuery = supabase
     .from("lead_logs")
-    .select("*, assignee:profiles(full_name, avatar_initials)");
+   .select(`
+  *,
+  assignee:users!lead_logs_assigned_to_id_fkey(
+    id,
+    full_name,
+    avatar_initials,
+    email
+  )
+`);
   dataQuery = applyLeadFilters(dataQuery, filters);
   dataQuery = dataQuery
     .order(dbSortField, { ascending: sortDir === "asc" })
@@ -127,7 +135,15 @@ export async function queryLeads(
 export async function getLeadById(supabase: SupabaseClient, id: string): Promise<LeadLogEntry> {
   const { data, error } = await supabase
     .from("lead_logs")
-    .select("*, assignee:profiles(full_name, avatar_initials)")
+    .select(`
+  *,
+  assignee:users!lead_logs_assigned_to_id_fkey(
+    id,
+    full_name,
+    avatar_initials,
+    email
+  )
+`)
     .eq("id", id)
     .single();
 
@@ -165,11 +181,17 @@ export async function createLeadRecord(
   const { data: row, error } = await supabase
     .from("lead_logs")
     .insert(data)
-    .select("*, assignee:profiles(full_name, avatar_initials)")
+    .select(`
+  *,
+  assigned_user:users!lead_logs_assigned_to_id_fkey(*)
+`)
     .single();
 
-  if (error || !row) throw new Error(`Failed to create lead: ${error?.message}`);
-  return row as unknown as LeadLogEntry;
+  if (error || !row) {
+    throw new Error(`Failed to create lead: ${error.message}`);
+  }
+
+  return row as LeadLogEntry;
 }
 
 /**
@@ -189,7 +211,15 @@ export async function updateLeadRecord(
     .from("lead_logs")
     .update(dbPatch)
     .eq("id", id)
-    .select("*, assignee:profiles(full_name, avatar_initials)")
+    .select(`
+  *,
+  assignee:users!lead_logs_assigned_to_id_fkey(
+    id,
+    full_name,
+    avatar_initials,
+    email
+  )
+`)
     .single();
 
   if (error || !data) throw new Error("Lead not found or update failed");
